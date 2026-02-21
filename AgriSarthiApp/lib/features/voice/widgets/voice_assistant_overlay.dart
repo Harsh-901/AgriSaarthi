@@ -121,22 +121,61 @@ class VoiceAssistantOverlay extends StatelessWidget {
                             if (provider.lastAction == 'confirm_apply')
                               ElevatedButton(
                                 onPressed: () async {
-                                  final result = await provider.confirmAction();
-                                  if (context.mounted &&
-                                      result['success'] == true) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Application Submitted!'),
-                                        backgroundColor: AppColors.success,
+                                  // Show loading
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Row(
+                                        children: [
+                                          SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          SizedBox(width: 12),
+                                          Text('Submitting application...'),
+                                        ],
                                       ),
-                                    );
+                                      duration: Duration(seconds: 10),
+                                      backgroundColor: AppColors.primary,
+                                    ),
+                                  );
+
+                                  final result = await provider.confirmAction();
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+                                    if (result['success'] == true) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content:
+                                              Text('Application Submitted! 🎉'),
+                                          backgroundColor: AppColors.success,
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            result['message'] ??
+                                                'Failed to submit application',
+                                          ),
+                                          backgroundColor: AppColors.error,
+                                        ),
+                                      );
+                                    }
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.success,
                                   foregroundColor: Colors.white,
                                 ),
-                                child: const Text('Confirm Apply'),
+                                child: const Text('✅ Confirm Apply'),
                               ),
 
                             // Navigating indicator for auto-navigate actions

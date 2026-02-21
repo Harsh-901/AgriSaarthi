@@ -52,6 +52,10 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
     super.dispose();
   }
 
+  // ════════════════════════════════════════════════════════════════════
+  // FILE PICKING LOGIC (unchanged)
+  // ════════════════════════════════════════════════════════════════════
+
   Future<void> _pickFromCamera(String docType) async {
     try {
       final XFile? image = await _imagePicker.pickImage(
@@ -98,88 +102,6 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
     }
   }
 
-  void _showPickerOptions(String docType) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Select ${DocumentType.getDisplayName(docType)}',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildPickerOption(
-                    icon: Icons.camera_alt_outlined,
-                    label: 'Camera',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _pickFromCamera(docType);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildPickerOption(
-                    icon: Icons.folder_outlined,
-                    label: 'Files',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _pickFromFile(docType);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPickerOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        decoration: BoxDecoration(
-          color: AppColors.primaryLight.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 40, color: AppColors.primary),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   bool get _allDocumentsSelected {
     return _selectedFiles.values.every((file) => file != null);
   }
@@ -199,7 +121,6 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
     });
 
     try {
-      // Convert Map<String, File?> to Map<String, File>
       final documentsToUpload = <String, File>{};
       _selectedFiles.forEach((key, value) {
         if (value != null) {
@@ -207,7 +128,6 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
         }
       });
 
-      // Add other document if present
       if (_otherDocument != null && _otherDocumentName.isNotEmpty) {
         documentsToUpload[DocumentType.other] = _otherDocument!;
       }
@@ -217,7 +137,6 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
       if (result['success'] == true) {
         if (mounted) {
           _showSuccess('Documents uploaded successfully!');
-          // Navigate to home after upload
           context.go(AppRouter.farmerHome);
         }
       } else {
@@ -260,91 +179,88 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════
+  // Icon color for each document type
+  // ════════════════════════════════════════════════════════════════════
+
+  Color _getDocIconColor(String docType) {
+    switch (docType) {
+      case 'aadhaar':
+        return const Color(0xFF5C6BC0); // indigo
+      case 'pan_card':
+        return const Color(0xFF26A69A); // teal
+      case 'land_certificate':
+        return const Color(0xFFFF7043); // deep orange
+      case 'seven_twelve':
+        return const Color(0xFFAB47BC); // purple
+      case 'eight_a':
+        return const Color(0xFF42A5F5); // blue
+      case 'bank_passbook':
+        return const Color(0xFF66BB6A); // green
+      default:
+        return const Color(0xFF78909C); // blue-grey
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // BUILD
+  // ════════════════════════════════════════════════════════════════════
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF8F5F0),
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
+        backgroundColor: Colors.white,
+        elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1B1B1B)),
           onPressed: () => context.pop(),
         ),
-        title: Text(
-          'Upload Required Documents',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+        title: const Text(
+          'Upload Documents',
+          style: TextStyle(
+            color: Color(0xFF1B1B1B),
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Progress indicator
+            // Instruction text
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Row(
-                children: [
-                  Text(
-                    '$_selectedCount of 6 documents selected',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                  ),
-                  const Spacer(),
-                  if (_allDocumentsSelected)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.success.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            size: 16,
-                            color: AppColors.success,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Ready',
-                            style: TextStyle(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Text(
+                'Please provide clear photos of the original documents.',
+                style: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
 
+            // Document list
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                physics: const BouncingScrollPhysics(),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Column(
                   children: [
+                    ...DocumentType.compulsory
+                        .map((docType) => _buildDocumentCard(docType)),
+
                     const SizedBox(height: 8),
 
-                    // Document cards
-                    ...DocumentType.compulsory.map(
-                      (docType) => _buildDocumentCard(docType),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Other document section
+                    // Other document
                     _buildOtherDocumentCard(),
 
-                    const SizedBox(height: 100), // Space for button
+                    const SizedBox(height: 90),
                   ],
                 ),
               ),
@@ -356,90 +272,133 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════
+  // DOCUMENT CARD – matching the screenshot design
+  // ════════════════════════════════════════════════════════════════════
+
   Widget _buildDocumentCard(String docType) {
     final file = _selectedFiles[docType];
-    final status = _documentStatus[docType];
     final isSelected = file != null;
+    final displayName = DocumentType.getDisplayName(docType);
+    final iconColor = _getDocIconColor(docType);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSelected ? AppColors.primary : AppColors.border,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Row 1: Icon + Name + Status badge
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  DocumentType.getDisplayName(docType),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+              // Document icon in colored circle
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.description_outlined,
+                  color: iconColor,
+                  size: 20,
                 ),
               ),
-              _buildStatusBadge(isSelected ? 'selected' : status!),
+              const SizedBox(width: 12),
+              // Name + status text
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1B1B1B),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isSelected ? 'Uploaded successfully' : 'Required',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isSelected
+                            ? const Color(0xFF43A047)
+                            : Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Status badge
+              _buildStatusBadge(isSelected ? 'uploaded' : 'pending'),
             ],
           ),
-          const SizedBox(height: 12),
+
+          const SizedBox(height: 14),
+
+          // Row 2: Camera + File buttons, or selected file info
           if (isSelected) ...[
-            // Show selected file info
+            // Show selected file
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primaryLight.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFFE8F5E9),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.insert_drive_file,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
+                  const Icon(Icons.insert_drive_file,
+                      color: Color(0xFF43A047), size: 20),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       file.path.split('/').last,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: const TextStyle(fontSize: 13),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 20),
-                    onPressed: () {
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
                         _selectedFiles[docType] = null;
                         _documentStatus[docType] = 'pending';
                       });
                     },
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                    child: Icon(Icons.close,
+                        size: 18, color: Colors.grey.shade600),
                   ),
                 ],
               ),
             ),
           ] else ...[
-            // Show upload buttons
+            // Camera + File buttons
             Row(
               children: [
                 Expanded(
-                  child: _buildUploadButton(
+                  child: _buildActionButton(
                     icon: Icons.camera_alt_outlined,
                     label: 'Camera',
                     onTap: () => _pickFromCamera(docType),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: _buildUploadButton(
-                    icon: Icons.insert_drive_file_outlined,
+                  child: _buildActionButton(
+                    icon: Icons.upload_file_outlined,
                     label: 'File',
                     onTap: () => _pickFromFile(docType),
                   ),
@@ -452,45 +411,84 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════
+  // OTHER DOCUMENT CARD
+  // ════════════════════════════════════════════════════════════════════
+
   Widget _buildOtherDocumentCard() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Add Other Document',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+          // Title row
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  shape: BoxShape.circle,
                 ),
+                child: Icon(Icons.add_circle_outline,
+                    color: Colors.grey.shade500, size: 20),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Other Document',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1B1B1B),
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Optional',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
+                    ),
+                  ],
+                ),
+              ),
+              _buildStatusBadge(
+                  _otherDocument != null ? 'uploaded' : 'optional'),
+            ],
           ),
+
           const SizedBox(height: 12),
 
-          // Document name input
+          // Name input
           TextField(
             controller: _otherDocNameController,
             decoration: InputDecoration(
               hintText: 'Document Name',
-              prefixIcon: const Icon(Icons.description_outlined),
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+              prefixIcon: Icon(Icons.description_outlined,
+                  color: Colors.grey.shade400, size: 18),
               filled: true,
-              fillColor: AppColors.surface,
+              fillColor: const Color(0xFFF5F5F5),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.border),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onChanged: (value) {
               setState(() {
@@ -498,39 +496,36 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
               });
             },
           ),
+
           const SizedBox(height: 12),
 
           if (_otherDocument != null) ...[
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primaryLight.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFFE8F5E9),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.insert_drive_file,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
+                  const Icon(Icons.insert_drive_file,
+                      color: Color(0xFF43A047), size: 20),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       _otherDocument!.path.split('/').last,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: const TextStyle(fontSize: 13),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 20),
-                    onPressed: () {
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
                         _otherDocument = null;
                       });
                     },
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                    child: Icon(Icons.close,
+                        size: 18, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -539,20 +534,20 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _buildUploadButton(
+                  child: _buildActionButton(
                     icon: Icons.camera_alt_outlined,
                     label: 'Camera',
                     onTap: () => _pickFromCamera(DocumentType.other),
-                    disabled: true, // Disabled style for optional
+                    muted: true,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: _buildUploadButton(
-                    icon: Icons.insert_drive_file_outlined,
+                  child: _buildActionButton(
+                    icon: Icons.upload_file_outlined,
                     label: 'File',
                     onTap: () => _pickFromFile(DocumentType.other),
-                    disabled: true,
+                    muted: true,
                   ),
                 ),
               ],
@@ -563,140 +558,187 @@ class _DocumentUploadScreenState extends State<DocumentUploadScreen> {
     );
   }
 
-  Widget _buildUploadButton({
+  // ════════════════════════════════════════════════════════════════════
+  // ACTION BUTTON (Camera / File)
+  // ════════════════════════════════════════════════════════════════════
+
+  Widget _buildActionButton({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
-    bool disabled = false,
+    bool muted = false,
   }) {
     return OutlinedButton.icon(
       onPressed: onTap,
-      icon: Icon(icon, size: 18),
-      label: Text(label),
+      icon: Icon(icon, size: 16),
+      label: Text(label, style: const TextStyle(fontSize: 13)),
       style: OutlinedButton.styleFrom(
         foregroundColor:
-            disabled ? AppColors.textHint : AppColors.textSecondary,
+            muted ? const Color(0xFF9E9E9E) : const Color(0xFF616161),
         side: BorderSide(
-          color: disabled ? AppColors.borderLight : AppColors.border,
+          color: muted ? const Color(0xFFE0E0E0) : const Color(0xFFBDBDBD),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════
+  // STATUS BADGE
+  // ════════════════════════════════════════════════════════════════════
+
   Widget _buildStatusBadge(String status) {
     Color bgColor;
     Color textColor;
-    IconData icon;
     String label;
 
     switch (status) {
-      case 'selected':
-        bgColor = AppColors.primary.withOpacity(0.1);
-        textColor = AppColors.primary;
-        icon = Icons.check_circle_outline;
-        label = 'Selected';
-        break;
       case 'uploaded':
-        bgColor = AppColors.success.withOpacity(0.1);
-        textColor = AppColors.success;
-        icon = Icons.check_circle;
-        label = 'Uploaded';
+      case 'selected':
+        bgColor = const Color(0xFFE8F5E9);
+        textColor = const Color(0xFF2E7D32);
+        label = 'UPLOADED';
         break;
       case 'verified':
-        bgColor = AppColors.success.withOpacity(0.1);
-        textColor = AppColors.success;
-        icon = Icons.verified;
-        label = 'Verified';
+        bgColor = const Color(0xFFE8F5E9);
+        textColor = const Color(0xFF2E7D32);
+        label = 'VERIFIED';
         break;
       case 'rejected':
-        bgColor = AppColors.error.withOpacity(0.1);
-        textColor = AppColors.error;
-        icon = Icons.cancel;
-        label = 'Rejected';
+        bgColor = const Color(0xFFFFEBEE);
+        textColor = const Color(0xFFE53935);
+        label = 'REJECTED';
+        break;
+      case 'optional':
+        bgColor = const Color(0xFFF5F5F5);
+        textColor = const Color(0xFF9E9E9E);
+        label = 'OPTIONAL';
         break;
       default: // pending
-        bgColor = AppColors.textHint.withOpacity(0.1);
-        textColor = AppColors.textHint;
-        icon = Icons.access_time;
-        label = 'Pending';
+        bgColor = const Color(0xFFFFF3E0);
+        textColor = const Color(0xFFE65100);
+        label = 'PENDING';
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(6),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: textColor),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+      child: Text(
+        label,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }
+
+  // ════════════════════════════════════════════════════════════════════
+  // CONTINUE BUTTON
+  // ════════════════════════════════════════════════════════════════════
 
   Widget _buildContinueButton() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
       child: SafeArea(
-        child: SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: _isLoading
-                ? null
-                : (_allDocumentsSelected ? _uploadDocuments : null),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _allDocumentsSelected
-                  ? AppColors.primary
-                  : AppColors.textHint,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Progress
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Text(
+                    '$_selectedCount of 6 documents selected',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (_allDocumentsSelected)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_circle,
+                              size: 14, color: Color(0xFF43A047)),
+                          SizedBox(width: 4),
+                          Text(
+                            'Ready',
+                            style: TextStyle(
+                              color: Color(0xFF43A047),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
-            child: _isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : Text(
-                    'Continue',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _isLoading
+                    ? null
+                    : (_allDocumentsSelected ? _uploadDocuments : null),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _allDocumentsSelected
+                      ? const Color(0xFF2E7D32)
+                      : const Color(0xFFBDBDBD),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
-          ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Upload Documents',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+              ),
+            ),
+          ],
         ),
       ),
     );

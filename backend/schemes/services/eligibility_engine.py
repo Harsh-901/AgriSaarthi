@@ -82,6 +82,15 @@ def _evaluate_rule(farmer, rule) -> bool:
 
     farmer_value = getattr(farmer, field_name)
 
+    # If the farmer field is None/empty, skip this rule gracefully
+    # (don't penalise incomplete profiles — same as unknown field)
+    if farmer_value is None or farmer_value == '':
+        logger.info(
+            "Farmer field '%s' is None/empty — skipping rule for scheme eligibility",
+            field_name
+        )
+        return True
+
     try:
         if operator == 'IN':
             return _evaluate_in(farmer_value, rule_value)
@@ -95,10 +104,10 @@ def _evaluate_rule(farmer, rule) -> bool:
             return True  # unknown operator → skip gracefully
     except Exception as e:
         logger.error(
-            "Error evaluating rule (field=%s, op=%s, val=%s): %s",
-            field_name, operator, rule_value, e
+            "Error evaluating rule (field=%s, op=%s, val=%s, farmer_val=%s): %s",
+            field_name, operator, rule_value, farmer_value, e
         )
-        return False  # on error, treat as ineligible
+        return True  # on error, skip gracefully instead of excluding farmer
 
 
 def _evaluate_in(farmer_value, rule_value: str) -> bool:

@@ -126,8 +126,8 @@ class SchemeService {
       return getSchemes(languageCode: languageCode);
     } catch (e) {
       debugPrint('SchemeService: Error fetching eligible schemes - $e');
-      // Fall back to Supabase
-      return getSchemes(languageCode: languageCode);
+      // Do NOT fall back to all schemes — only show eligibility-filtered results
+      return [];
     }
   }
 
