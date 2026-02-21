@@ -5,11 +5,16 @@ import '../../features/auth/screens/splash_screen.dart';
 import '../../features/auth/screens/welcome_screen.dart';
 import '../../features/auth/screens/farmer_login_screen.dart';
 import '../../features/auth/screens/admin_login_screen.dart';
+
 import '../../features/home/screens/farmer_home_screen.dart';
 import '../../features/home/screens/admin_home_screen.dart';
+import '../../features/home/screens/admin_application_view_screen.dart';
+
 import '../../features/profile/screens/farmer_profile_form_screen.dart';
-import '../../features/documents/screens/document_upload_screen.dart';
 import '../../features/profile/screens/farmer_profile_screen.dart';
+
+import '../../features/documents/screens/document_upload_screen.dart';
+
 import '../../features/applications/screens/applications_screen.dart';
 import '../../features/schemes/screens/manage_schemes_screen.dart';
 import '../../features/claims/screens/insurance_claim_screen.dart';
@@ -27,6 +32,7 @@ class AppRouter {
   static const String applications = '/applications';
   static const String manageSchemes = '/manage-schemes';
   static const String insuranceClaim = '/insurance-claim';
+  static const String adminApplicationView = '/admin-application-view';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -90,6 +96,13 @@ class AppRouter {
         path: insuranceClaim,
         name: 'insuranceClaim',
         builder: (context, state) => const InsuranceClaimScreen(),
+      ),
+      GoRoute(
+        path: '$adminApplicationView/:id',
+        name: 'adminApplicationView',
+        builder: (context, state) => AdminApplicationViewScreen(
+          applicationId: state.pathParameters['id']!,
+        ),
       ),
     ],
   );

@@ -41,19 +41,19 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
     super.dispose();
   }
 
-  /// Initialize API service and load applications
+  // ════════════════════════════════════════════════════════════════════
+  // DATA LOGIC (unchanged)
+  // ════════════════════════════════════════════════════════════════════
+
   Future<void> _initAndLoad() async {
     await _apiService.init();
-
     if (!_apiService.isAuthenticated) {
-      // Need to authenticate with Django
       await _authenticateWithDjango();
     } else {
       await _loadApplications();
     }
   }
 
-  /// Authenticate with Django backend using farmer's phone
   Future<void> _authenticateWithDjango() async {
     if (!mounted) return;
     setState(() {
@@ -77,7 +77,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
       debugPrint(
           'ApplicationsScreen: Authenticating with Django for phone: $phone');
 
-      // Step 1: Send OTP to Django
       final otpResponse = await _apiService.sendDjangoOtp(phone);
       if (otpResponse['success'] != true) {
         setState(() {
@@ -89,11 +88,9 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
         return;
       }
 
-      // Step 2: Get demo OTP (for development) or show OTP dialog
       final demoOtp = otpResponse['data']?['demo_otp']?.toString();
 
       if (demoOtp != null) {
-        // Auto-verify with demo OTP
         final verifyResponse =
             await _apiService.verifyDjangoOtp(phone, demoOtp);
         if (verifyResponse['success'] == true) {
@@ -104,7 +101,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
         }
       }
 
-      // If no demo OTP, show manual OTP input
       if (mounted) {
         _showOtpDialog(phone);
       }
@@ -118,7 +114,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
     }
   }
 
-  /// Show OTP dialog for manual entry
   void _showOtpDialog(String phone) {
     final otpController = TextEditingController();
 
@@ -182,7 +177,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
     );
   }
 
-  /// Load applications from Django
   Future<void> _loadApplications() async {
     if (!mounted) return;
     setState(() {
@@ -223,28 +217,43 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
     }).toList();
   }
 
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // BUILD
+  // ════════════════════════════════════════════════════════════════════
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF8F5F0),
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
+        backgroundColor: Colors.white,
+        elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1B1B1B)),
           onPressed: () => context.pop(),
         ),
-        title: Text(
+        title: const Text(
           'My Applications',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: TextStyle(
+            color: Color(0xFF1B1B1B),
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
             onPressed: _loadApplications,
-            icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
+            icon: const Icon(Icons.refresh, color: Color(0xFF1B1B1B)),
           ),
         ],
       ),
@@ -258,6 +267,431 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════
+  // CONTENT
+  // ════════════════════════════════════════════════════════════════════
+
+  Widget _buildContent() {
+    return Column(
+      children: [
+        const SizedBox(height: 14),
+        // ── Status summary counters ──
+        _buildStatusSummary(),
+        const SizedBox(height: 14),
+        // ── Filter chips ──
+        _buildFilterChips(),
+        const SizedBox(height: 8),
+        // ── Applications list ──
+        Expanded(
+          child: _filteredApplications.isEmpty
+              ? _buildEmptyView()
+              : RefreshIndicator(
+                  onRefresh: _loadApplications,
+                  color: AppColors.primary,
+                  child: ListView.builder(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: _filteredApplications.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == _filteredApplications.length) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: Text(
+                              'Tap on an application to view details',
+                              style: TextStyle(
+                                color: Colors.grey.shade400,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      return _buildApplicationCard(
+                          _filteredApplications[index]);
+                    },
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // STATUS SUMMARY – pill counters
+  // ════════════════════════════════════════════════════════════════════
+
+  Widget _buildStatusSummary() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          _buildCounterPill(
+            _statusCounts.total,
+            'Total',
+            const Color(0xFF2E7D32),
+            const Color(0xFFE8F5E9),
+          ),
+          const SizedBox(width: 10),
+          _buildCounterPill(
+            _statusCounts.pending + _statusCounts.pendingConfirmation,
+            'Pending',
+            const Color(0xFFFF8F00),
+            const Color(0xFFFFF3E0),
+          ),
+          const SizedBox(width: 10),
+          _buildCounterPill(
+            _statusCounts.approved,
+            'Approved',
+            const Color(0xFF00897B),
+            const Color(0xFFE0F2F1),
+          ),
+          const SizedBox(width: 10),
+          _buildCounterPill(
+            _statusCounts.rejected,
+            'Rejected',
+            const Color(0xFFE53935),
+            const Color(0xFFFFEBEE),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCounterPill(int count, String label, Color color, Color bgColor) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withOpacity(0.25)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              count.toString(),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: color.withOpacity(0.8),
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // FILTER CHIPS
+  // ════════════════════════════════════════════════════════════════════
+
+  Widget _buildFilterChips() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _buildChip('All', 'all'),
+            const SizedBox(width: 8),
+            _buildChip('Pending', 'pending'),
+            const SizedBox(width: 8),
+            _buildChip('Approved', 'approved'),
+            const SizedBox(width: 8),
+            _buildChip('Rejected', 'rejected'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChip(String label, String filter) {
+    final isSelected = _selectedFilter == filter;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedFilter = filter),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2E7D32) : Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF2E7D32)
+                : const Color(0xFFE0E0E0),
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF2E7D32).withOpacity(0.25),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : const Color(0xFF616161),
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // APPLICATION CARD – matching the screenshot design
+  // ════════════════════════════════════════════════════════════════════
+
+  Widget _buildApplicationCard(ApplicationModel application) {
+    final statusColor = _getStatusColor(application.status);
+    final statusIcon = _getStatusIcon(application.status);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _showApplicationDetail(application),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Row 1: Icon + Name + Status badge
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Status icon circle
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(statusIcon, color: statusColor, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    // Scheme name
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            application.schemeName,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1B1B1B),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Status badge
+                    _buildStatusBadge(
+                        application.status, application.statusDisplay),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Row 2: Amount + Date
+                Row(
+                  children: [
+                    if (application.benefitAmount != null) ...[
+                      const Text(
+                        '₹ ',
+                        style: TextStyle(
+                          color: Color(0xFF2E7D32),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        '₹${application.benefitAmount!.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          color: Color(0xFF2E7D32),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                    Icon(Icons.calendar_today,
+                        size: 13, color: Colors.grey.shade400),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatDate(application.createdAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Rejection reason
+                if (application.isRejected &&
+                    application.rejectionReason != null &&
+                    application.rejectionReason!.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(8),
+                      border:
+                          Border.all(color: AppColors.error.withOpacity(0.15)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline,
+                            size: 14, color: AppColors.error),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            application.rejectionReason!,
+                            style: const TextStyle(
+                                color: AppColors.error, fontSize: 12),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // Confirm button for pending confirmation
+                if (application.canConfirm) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => _confirmApplication(application),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E7D32),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Confirm & Submit',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // STATUS BADGE
+  // ════════════════════════════════════════════════════════════════════
+
+  Widget _buildStatusBadge(String status, String displayText) {
+    final color = _getStatusColor(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        displayText,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'APPROVED':
+        return const Color(0xFF00897B);
+      case 'REJECTED':
+        return const Color(0xFFE53935);
+      case 'PENDING':
+      case 'PENDING_CONFIRMATION':
+        return const Color(0xFFFF8F00);
+      case 'UNDER_REVIEW':
+        return AppColors.info;
+      case 'INCOMPLETE':
+        return Colors.orange;
+      case 'DRAFT':
+      default:
+        return AppColors.textSecondary;
+    }
+  }
+
+  IconData _getStatusIcon(String status) {
+    switch (status) {
+      case 'APPROVED':
+        return Icons.check_circle_outline;
+      case 'REJECTED':
+        return Icons.cancel_outlined;
+      case 'PENDING':
+      case 'PENDING_CONFIRMATION':
+        return Icons.hourglass_empty;
+      case 'UNDER_REVIEW':
+        return Icons.visibility_outlined;
+      case 'INCOMPLETE':
+        return Icons.warning_amber_outlined;
+      case 'DRAFT':
+      default:
+        return Icons.edit_note_outlined;
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // LOADING / AUTH / ERROR / EMPTY VIEWS
+  // ════════════════════════════════════════════════════════════════════
+
   Widget _buildAuthenticatingView() {
     return Center(
       child: Column(
@@ -266,11 +700,11 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: const Color(0xFF2E7D32).withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const CircularProgressIndicator(
-              color: AppColors.primary,
+              color: Color(0xFF2E7D32),
               strokeWidth: 3,
             ),
           ),
@@ -295,7 +729,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
 
   Widget _buildLoadingView() {
     return const Center(
-      child: CircularProgressIndicator(color: AppColors.primary),
+      child: CircularProgressIndicator(color: Color(0xFF2E7D32)),
     );
   }
 
@@ -339,7 +773,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: const Color(0xFF2E7D32),
                 foregroundColor: Colors.white,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
@@ -354,391 +788,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
     );
   }
 
-  Widget _buildContent() {
-    return Column(
-      children: [
-        // Status Summary Cards
-        _buildStatusSummary(),
-
-        // Filter Tabs
-        _buildFilterTabs(),
-
-        // Applications List
-        Expanded(
-          child: _filteredApplications.isEmpty
-              ? _buildEmptyView()
-              : RefreshIndicator(
-                  onRefresh: _loadApplications,
-                  color: AppColors.primary,
-                  child: ListView.builder(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    itemCount: _filteredApplications.length,
-                    itemBuilder: (context, index) =>
-                        _buildApplicationCard(_filteredApplications[index]),
-                  ),
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusSummary() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Row(
-        children: [
-          _buildStatusChip(
-            'Total',
-            _statusCounts.total,
-            AppColors.primary,
-          ),
-          const SizedBox(width: 8),
-          _buildStatusChip(
-            'Pending',
-            _statusCounts.pending + _statusCounts.pendingConfirmation,
-            AppColors.warning,
-          ),
-          const SizedBox(width: 8),
-          _buildStatusChip(
-            'Approved',
-            _statusCounts.approved,
-            AppColors.success,
-          ),
-          const SizedBox(width: 8),
-          _buildStatusChip(
-            'Rejected',
-            _statusCounts.rejected,
-            AppColors.error,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusChip(String label, int count, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        child: Column(
-          children: [
-            Text(
-              count.toString(),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w500,
-                  ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterTabs() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _buildFilterButton('All', 'all'),
-            const SizedBox(width: 8),
-            _buildFilterButton('Pending', 'pending'),
-            const SizedBox(width: 8),
-            _buildFilterButton('Approved', 'approved'),
-            const SizedBox(width: 8),
-            _buildFilterButton('Rejected', 'rejected'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterButton(String label, String filter) {
-    final isSelected = _selectedFilter == filter;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedFilter = filter),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : AppColors.textSecondary,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            fontSize: 14,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildApplicationCard(ApplicationModel application) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () => _showApplicationDetail(application),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header: Scheme name + Status badge
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Scheme icon
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(application.status)
-                            .withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        _getStatusIcon(application.status),
-                        color: _getStatusColor(application.status),
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Scheme name
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            application.schemeName,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (application.trackingId != null) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              'ID: ${application.trackingId}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: AppColors.textHint,
-                                    fontFamily: 'monospace',
-                                  ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    // Status badge
-                    _buildAppStatusBadge(
-                        application.status, application.statusDisplay),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Info row
-                Row(
-                  children: [
-                    if (application.benefitAmount != null) ...[
-                      Icon(Icons.currency_rupee,
-                          size: 16, color: AppColors.success),
-                      const SizedBox(width: 4),
-                      Text(
-                        '₹${application.benefitAmount!.toStringAsFixed(0)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.success,
-                            ),
-                      ),
-                      const SizedBox(width: 16),
-                    ],
-                    Icon(Icons.calendar_today,
-                        size: 14, color: AppColors.textHint),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatDate(application.createdAt),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                  ],
-                ),
-
-                // Rejection reason
-                if (application.isRejected &&
-                    application.rejectionReason != null &&
-                    application.rejectionReason!.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(8),
-                      border:
-                          Border.all(color: AppColors.error.withOpacity(0.2)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info_outline,
-                            size: 16, color: AppColors.error),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            application.rejectionReason!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: AppColors.error),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-
-                // Confirm button for pending confirmation
-                if (application.canConfirm) ...[
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => _confirmApplication(application),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        'Confirm & Submit',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAppStatusBadge(String status, String displayText) {
-    final color = _getStatusColor(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        displayText,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'APPROVED':
-        return AppColors.success;
-      case 'REJECTED':
-        return AppColors.error;
-      case 'PENDING':
-      case 'PENDING_CONFIRMATION':
-        return AppColors.warning;
-      case 'UNDER_REVIEW':
-        return AppColors.info;
-      case 'INCOMPLETE':
-        return Colors.orange;
-      case 'DRAFT':
-      default:
-        return AppColors.textSecondary;
-    }
-  }
-
-  IconData _getStatusIcon(String status) {
-    switch (status) {
-      case 'APPROVED':
-        return Icons.check_circle_outline;
-      case 'REJECTED':
-        return Icons.cancel_outlined;
-      case 'PENDING':
-      case 'PENDING_CONFIRMATION':
-        return Icons.hourglass_empty;
-      case 'UNDER_REVIEW':
-        return Icons.visibility_outlined;
-      case 'INCOMPLETE':
-        return Icons.warning_amber_outlined;
-      case 'DRAFT':
-      default:
-        return Icons.edit_note_outlined;
-    }
-  }
-
   Widget _buildEmptyView() {
     return Center(
       child: Padding(
@@ -749,13 +798,13 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
+                color: const Color(0xFF2E7D32).withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.description_outlined,
                 size: 56,
-                color: AppColors.primary,
+                color: Color(0xFF2E7D32),
               ),
             ),
             const SizedBox(height: 24),
@@ -784,8 +833,8 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
                 icon: const Icon(Icons.home_outlined),
                 label: const Text('Browse Schemes'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
+                  foregroundColor: const Color(0xFF2E7D32),
+                  side: const BorderSide(color: Color(0xFF2E7D32)),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -800,7 +849,10 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
     );
   }
 
-  /// Show application detail bottom sheet
+  // ════════════════════════════════════════════════════════════════════
+  // APPLICATION DETAIL BOTTOM SHEET
+  // ════════════════════════════════════════════════════════════════════
+
   void _showApplicationDetail(ApplicationModel application) {
     showModalBottomSheet(
       context: context,
@@ -812,47 +864,41 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
         minChildSize: 0.5,
         builder: (context, scrollController) => Container(
           decoration: const BoxDecoration(
-            color: AppColors.surface,
+            color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
-              // Handle
               Container(
                 margin: const EdgeInsets.only(top: 12),
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.border,
+                  color: const Color(0xFFE0E0E0),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              // Content
               Expanded(
                 child: ListView(
                   controller: scrollController,
                   padding: const EdgeInsets.all(24),
                   children: [
-                    // Status header
                     Center(
-                      child: _buildAppStatusBadge(
+                      child: _buildStatusBadge(
                           application.status, application.statusDisplay),
                     ),
                     const SizedBox(height: 16),
-
-                    // Scheme Name
                     Center(
                       child: Text(
                         application.schemeName,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                         textAlign: TextAlign.center,
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Details
                     _buildDetailRow(
                         'Tracking ID', application.trackingId ?? 'N/A'),
                     _buildDetailRow('Application ID',
@@ -871,8 +917,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
                     if (application.governmentReference != null)
                       _buildDetailRow(
                           'Govt. Ref', application.governmentReference!),
-
-                    // Missing documents
                     if (application.missingDocuments.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Text(
@@ -892,14 +936,13 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
                                     size: 16, color: AppColors.error),
                                 const SizedBox(width: 8),
                                 Text(doc.toString(),
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium),
                               ],
                             ),
                           )),
                     ],
-
-                    // Rejection reason
                     if (application.isRejected &&
                         application.rejectionReason != null &&
                         application.rejectionReason!.isNotEmpty) ...[
@@ -937,8 +980,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
                         ),
                       ),
                     ],
-
-                    // Action button
                     if (application.canConfirm) ...[
                       const SizedBox(height: 24),
                       SizedBox(
@@ -950,7 +991,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
                             _confirmApplication(application);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: const Color(0xFF2E7D32),
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
@@ -1006,7 +1047,10 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
     );
   }
 
-  /// Confirm an application
+  // ════════════════════════════════════════════════════════════════════
+  // CONFIRM APPLICATION
+  // ════════════════════════════════════════════════════════════════════
+
   Future<void> _confirmApplication(ApplicationModel application) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1024,7 +1068,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: const Color(0xFF2E7D32),
               foregroundColor: Colors.white,
             ),
             child: const Text('Confirm & Submit'),
@@ -1060,15 +1104,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
           setState(() => _isLoading = false);
         }
       }
-    }
-  }
-
-  String _formatDate(String dateStr) {
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.day}/${date.month}/${date.year}';
-    } catch (e) {
-      return dateStr;
     }
   }
 }

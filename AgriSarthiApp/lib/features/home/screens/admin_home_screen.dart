@@ -385,7 +385,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
           // Verify button
           OutlinedButton(
-            onPressed: () => _showVerifyDialog(applicationId, farmerName),
+            onPressed: () => _navigateToApplicationView(applicationId),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primary,
               side: const BorderSide(color: AppColors.primary),
@@ -522,10 +522,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 color: AppColors.secondary,
                 onTap: () {
                   if (_pendingVerifications.isNotEmpty) {
-                    _showVerifyDialog(
+                    _navigateToApplicationView(
                       _pendingVerifications.first['id'].toString(),
-                      _pendingVerifications.first['farmers']?['name'] ??
-                          'Unknown',
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -582,109 +580,14 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  /// Show verify/reject dialog for an application
-  void _showVerifyDialog(String applicationId, String farmerName) {
-    final notesController = TextEditingController();
-    final reasonController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Verify: $farmerName'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Admin Notes (optional):'),
-              const SizedBox(height: 8),
-              TextField(
-                controller: notesController,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  hintText: 'Add notes...',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text('Rejection Reason (if rejecting):'),
-              const SizedBox(height: 8),
-              TextField(
-                controller: reasonController,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  hintText: 'Reason for rejection...',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await _adminService.updateApplicationStatus(
-                applicationId,
-                status: 'REJECTED',
-                adminNotes: notesController.text,
-                rejectionReason: reasonController.text,
-                verifiedBy: 'admin',
-              );
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(success ? 'Application rejected' : 'Failed'),
-                    backgroundColor:
-                        success ? AppColors.warning : AppColors.error,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-                if (success) _loadDashboardData();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Reject'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await _adminService.updateApplicationStatus(
-                applicationId,
-                status: 'APPROVED',
-                adminNotes: notesController.text,
-                verifiedBy: 'admin',
-              );
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content:
-                        Text(success ? 'Application approved ✅' : 'Failed'),
-                    backgroundColor:
-                        success ? AppColors.success : AppColors.error,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-                if (success) _loadDashboardData();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Approve'),
-          ),
-        ],
-      ),
+  /// Navigate to application view screen
+  Future<void> _navigateToApplicationView(String applicationId) async {
+    final result = await context.push<bool>(
+      '${AppRouter.adminApplicationView}/$applicationId',
     );
+    if (result == true && mounted) {
+      _loadDashboardData();
+    }
   }
 
   String _formatNumber(int number) {
