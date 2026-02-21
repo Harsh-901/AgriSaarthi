@@ -4,6 +4,7 @@ import 'api_service.dart';
 /// Application model matching Django Application model
 class ApplicationModel {
   final String id;
+  final String? schemeId;
   final String schemeName;
   final String? schemeNameHindi;
   final String status;
@@ -22,6 +23,7 @@ class ApplicationModel {
 
   ApplicationModel({
     required this.id,
+    this.schemeId,
     required this.schemeName,
     this.schemeNameHindi,
     required this.status,
@@ -42,6 +44,7 @@ class ApplicationModel {
   factory ApplicationModel.fromJson(Map<String, dynamic> json) {
     return ApplicationModel(
       id: json['id']?.toString() ?? '',
+      schemeId: json['scheme_id']?.toString(),
       schemeName: json['scheme_name'] ?? 'Unknown Scheme',
       schemeNameHindi: json['scheme_name_hindi'],
       status: json['status'] ?? 'DRAFT',

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/services/claims_service.dart';
 import '../../../core/services/document_service.dart';
 import '../../../core/theme/app_theme.dart';
@@ -111,16 +112,15 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
 
   Future<void> _acknowledgeAlert(bool hasDamage) async {
     if (_alertId == null) return;
-    final result =
-        await _claimsService.acknowledgeAlert(_alertId!, hasDamage);
+    final result = await _claimsService.acknowledgeAlert(_alertId!, hasDamage);
     if (!mounted) return;
     if (hasDamage && result['success'] == true) {
       _goToStep(1);
     } else if (!hasDamage) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Glad your crops are safe! 🌾'),
+          SnackBar(
+            content: Text('claims.crops_safe_msg'.tr()),
             backgroundColor: AppColors.success,
           ),
         );
@@ -146,8 +146,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
         _claimData = result['data'];
         _claimId = result['data']['id'];
         _claimReadableId = result['data']['claim_id'];
-        _hoursRemaining =
-            (result['data']['hours_remaining'] ?? 72).toDouble();
+        _hoursRemaining = (result['data']['hours_remaining'] ?? 72).toDouble();
         _startDeadlineTimer();
         _goToStep(2);
       }
@@ -156,7 +155,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     if (result['success'] != true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] ?? 'Failed to create claim'),
+          content: Text(result['message'] ?? 'claims.failed_create_claim'.tr()),
           backgroundColor: AppColors.error,
         ),
       );
@@ -185,14 +184,15 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     setState(() {
       _isUploadingPhoto = false;
       if (result['success'] == true) {
-        _uploadedPhotoCount = result['data']?['total_photos'] ?? _uploadedPhotoCount + 1;
+        _uploadedPhotoCount =
+            result['data']?['total_photos'] ?? _uploadedPhotoCount + 1;
       }
     });
 
     if (result['success'] != true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] ?? 'Upload failed'),
+          content: Text(result['message'] ?? 'claims.upload_failed'.tr()),
           backgroundColor: AppColors.error,
         ),
       );
@@ -220,7 +220,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     setState(() {
       _isUploadingPhoto = false;
       if (result['success'] == true) {
-        _uploadedPhotoCount = result['data']?['total_photos'] ?? _uploadedPhotoCount + 1;
+        _uploadedPhotoCount =
+            result['data']?['total_photos'] ?? _uploadedPhotoCount + 1;
       }
     });
   }
@@ -256,7 +257,9 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
       type: FileType.custom,
       allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
     );
-    if (result == null || result.files.isEmpty || result.files.single.path == null) return;
+    if (result == null ||
+        result.files.isEmpty ||
+        result.files.single.path == null) return;
 
     final file = File(result.files.single.path!);
     setState(() => _isUploadingMissingDoc = true);
@@ -294,25 +297,25 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.send_rounded, color: AppColors.primary),
-            SizedBox(width: 8),
-            Text('Submit Claim?'),
+            const Icon(Icons.send_rounded, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text('claims.submit_confirm_title'.tr()),
           ],
         ),
-        content: const Text(
-          'Are you sure you want to submit this claim for verification?\n\nThis action cannot be undone.',
+        content: Text(
+          'claims.submit_confirm_msg'.tr(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Review Again'),
+            child: Text('claims.review_again'.tr()),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Yes, Submit'),
+            child: Text('claims.yes_submit'.tr()),
           ),
         ],
       ),
@@ -335,7 +338,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] ?? 'Submission failed'),
+          content: Text(result['message'] ?? 'claims.submission_failed'.tr()),
           backgroundColor: AppColors.error,
         ),
       );
@@ -347,22 +350,21 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.check_circle, color: AppColors.success, size: 64),
             const SizedBox(height: 16),
             Text(
-              'Claim Submitted!',
+              'claims.claim_submitted'.tr(),
               style: Theme.of(ctx).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Claim ID: ${_claimReadableId ?? ''}',
+              '${'claims.label_claim_id'.tr()}: ${_claimReadableId ?? ''}',
               style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
@@ -370,7 +372,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'Your claim has been submitted for admin verification.',
+              'claims.claim_submitted_msg'.tr(),
               textAlign: TextAlign.center,
               style: Theme.of(ctx).textTheme.bodyMedium,
             ),
@@ -382,7 +384,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
-            child: const Text('Done'),
+            child: Text('claims.done'.tr()),
           ),
         ],
       ),
@@ -394,11 +396,13 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Insurance Claim'),
+        title: Text('claims.title'.tr()),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
         actions: [
+          // Language selector
+          _buildLanguageSelector(context),
           if (_claimReadableId != null)
             Padding(
               padding: const EdgeInsets.only(right: 16),
@@ -447,11 +451,14 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
             gradient: LinearGradient(
               colors: urgent
                   ? [
-                      AppColors.error
-                          .withValues(alpha: 0.8 + _pulseController.value * 0.2),
+                      AppColors.error.withValues(
+                          alpha: 0.8 + _pulseController.value * 0.2),
                       AppColors.error.withValues(alpha: 0.6),
                     ]
-                  : [AppColors.secondary, AppColors.secondary.withValues(alpha: 0.7)],
+                  : [
+                      AppColors.secondary,
+                      AppColors.secondary.withValues(alpha: 0.7)
+                    ],
             ),
           ),
           child: Row(
@@ -463,7 +470,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
               ),
               const SizedBox(width: 8),
               Text(
-                '⏰ ${_hoursRemaining.toStringAsFixed(1)} hours remaining',
+                '⏰ ${_hoursRemaining.toStringAsFixed(1)} ${'claims.hours_remaining'.tr()}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -472,7 +479,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
               ),
               const Spacer(),
               Text(
-                urgent ? 'URGENT!' : '72hr Deadline',
+                urgent ? 'claims.urgent'.tr() : 'claims.deadline_72hr'.tr(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -486,8 +493,68 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     );
   }
 
+  Widget _buildLanguageSelector(BuildContext context) {
+    final currentLocale = context.locale;
+    final languages = {
+      const Locale('en'): '🇬🇧 English',
+      const Locale('hi'): '🇮🇳 हिंदी',
+      const Locale('mr'): '🇮🇳 मराठी',
+    };
+    return PopupMenuButton<Locale>(
+      icon: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.translate, size: 16, color: AppColors.primary),
+            const SizedBox(width: 4),
+            Text(
+              currentLocale.languageCode.toUpperCase(),
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary),
+            ),
+          ],
+        ),
+      ),
+      onSelected: (locale) {
+        context.setLocale(locale);
+      },
+      itemBuilder: (ctx) => languages.entries.map((e) {
+        final isSelected = e.key == currentLocale;
+        return PopupMenuItem<Locale>(
+          value: e.key,
+          child: Row(
+            children: [
+              Text(e.value,
+                  style: TextStyle(
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal)),
+              if (isSelected) ...[
+                const Spacer(),
+                const Icon(Icons.check, size: 16, color: AppColors.primary),
+              ],
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildStepIndicator() {
-    final steps = ['Weather', 'Form', 'Photos', 'Docs', 'Submit'];
+    final steps = [
+      'claims.step_weather'.tr(),
+      'claims.step_form'.tr(),
+      'claims.step_photos'.tr(),
+      'claims.step_docs'.tr(),
+      'claims.step_submit'.tr(),
+    ];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -542,9 +609,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                     child: Container(
                       height: 2,
                       width: 20,
-                      color: isCompleted
-                          ? AppColors.success
-                          : AppColors.border,
+                      color: isCompleted ? AppColors.success : AppColors.border,
                     ),
                   ),
               ],
@@ -572,8 +637,20 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
 
   Widget _buildCompletedStepSummary(int step) {
     final isExpanded = _expandedSteps.contains(step);
-    final stepNames = ['Weather Check', 'Claim Form', 'Evidence Photos', 'Documents', 'Submit'];
-    final stepIcons = [Icons.cloud_done, Icons.description, Icons.camera_alt, Icons.folder, Icons.send];
+    final stepNames = [
+      'claims.step_name_weather'.tr(),
+      'claims.step_name_form'.tr(),
+      'claims.step_name_photos'.tr(),
+      'claims.step_name_docs'.tr(),
+      'claims.step_name_submit'.tr(),
+    ];
+    final stepIcons = [
+      Icons.cloud_done,
+      Icons.description,
+      Icons.camera_alt,
+      Icons.folder,
+      Icons.send
+    ];
 
     return Container(
       decoration: BoxDecoration(
@@ -619,7 +696,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                         ),
                         Text(
                           _getCompletedStepSubtitle(step),
-                          style: const TextStyle(fontSize: 12, color: AppColors.success),
+                          style: const TextStyle(
+                              fontSize: 12, color: AppColors.success),
                         ),
                       ],
                     ),
@@ -647,16 +725,20 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
   String _getCompletedStepSubtitle(int step) {
     switch (step) {
       case 0:
-        return _alertDetected ? '⚠️ Alert: ${_selectedLossType.toUpperCase()}' : '✅ Weather normal';
+        return _alertDetected
+            ? '⚠️ ${'claims.weather_alert'.tr()}: ${_selectedLossType.toUpperCase()}'
+            : '✅ ${'claims.weather_normal_check'.tr()}';
       case 1:
-        return '✅ Claim ${_claimReadableId ?? ''} created';
+        return '✅ ${'claims.label_claim_id'.tr()} ${_claimReadableId ?? ''} ${'claims.claim_created'.tr()}';
       case 2:
-        return '✅ $_uploadedPhotoCount photo(s) uploaded';
+        return '✅ $_uploadedPhotoCount ${'claims.photos_count'.tr()}';
       case 3:
         final complete = _docsResult?['data']?['documents_complete'] == true;
-        return complete ? '✅ All documents attached' : '⚠️ Some documents missing';
+        return complete
+            ? '✅ ${'claims.all_docs_attached'.tr()}'
+            : '⚠️ ${'claims.some_docs_missing_summary'.tr()}';
       default:
-        return '✅ Completed';
+        return '✅ ${'claims.completed'.tr()}';
     }
   }
 
@@ -679,12 +761,15 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     final weather = _weatherResult?['weather'] ?? {};
     return Column(
       children: [
-        _summaryRow('Location', _weatherResult?['location'] ?? '-'),
-        _summaryRow('Temp', '${weather['temp_c'] ?? '-'}°C'),
-        _summaryRow('Humidity', '${weather['humidity'] ?? '-'}%'),
-        _summaryRow('Condition', weather['condition_text'] ?? '-'),
+        _summaryRow(
+            'claims.label_location'.tr(), _weatherResult?['location'] ?? '-'),
+        _summaryRow('claims.temp'.tr(), '${weather['temp_c'] ?? '-'}°C'),
+        _summaryRow('claims.humidity'.tr(), '${weather['humidity'] ?? '-'}%'),
+        _summaryRow(
+            'claims.label_condition'.tr(), weather['condition_text'] ?? '-'),
         if (_alertDetected)
-          _summaryRow('Alert', '${_selectedLossType.replaceAll('_', ' ').toUpperCase()} detected'),
+          _summaryRow('claims.weather_alert'.tr(),
+              '${_selectedLossType.replaceAll('_', ' ').toUpperCase()} ${'claims.alert_detected'.tr()}'),
       ],
     );
   }
@@ -692,12 +777,19 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
   Widget _buildFormSummaryContent() {
     return Column(
       children: [
-        _summaryRow('Claim ID', _claimReadableId ?? '-'),
-        _summaryRow('Loss Type', _selectedLossType.replaceAll('_', ' ').toUpperCase()),
-        _summaryRow('Area', '${_areaController.text} acres'),
-        _summaryRow('Survey No.', _surveyNumberController.text.isNotEmpty ? _surveyNumberController.text : '-'),
+        _summaryRow('claims.label_claim_id'.tr(), _claimReadableId ?? '-'),
+        _summaryRow('claims.label_loss_type'.tr(),
+            _selectedLossType.replaceAll('_', ' ').toUpperCase()),
+        _summaryRow('claims.label_area_affected'.tr(),
+            '${_areaController.text} ${'claims.acres'.tr()}'),
+        _summaryRow(
+            'claims.label_survey_number'.tr(),
+            _surveyNumberController.text.isNotEmpty
+                ? _surveyNumberController.text
+                : '-'),
         if (_descriptionController.text.isNotEmpty)
-          _summaryRow('Description', _descriptionController.text),
+          _summaryRow(
+              'claims.label_description'.tr(), _descriptionController.text),
       ],
     );
   }
@@ -706,7 +798,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _summaryRow('Photos Uploaded', '$_uploadedPhotoCount'),
+        _summaryRow(
+            'claims.label_photos_uploaded'.tr(), '$_uploadedPhotoCount'),
         if (_evidencePhotos.isNotEmpty) ...[
           const SizedBox(height: 8),
           SizedBox(
@@ -739,9 +832,10 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     final missing = _docsResult?['data']?['missing'] as List? ?? [];
     return Column(
       children: [
-        _summaryRow('Attached', '$attached document(s)'),
+        _summaryRow('claims.attached'.tr(),
+            '$attached ${'claims.document_count'.tr()}'),
         if (missing.isNotEmpty)
-          _summaryRow('Missing', missing.join(', ')),
+          _summaryRow('claims.label_missing'.tr(), missing.join(', ')),
       ],
     );
   }
@@ -771,9 +865,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
         // Info card
         _buildInfoCard(
           icon: Icons.cloud,
-          title: 'Check Weather Conditions',
-          subtitle:
-              'We\'ll check current weather at your registered location to detect any extreme conditions that may have damaged your crops.',
+          title: 'claims.check_weather_title'.tr(),
+          subtitle: 'claims.check_weather_desc'.tr(),
           color: AppColors.info,
         ),
         const SizedBox(height: 20),
@@ -792,8 +885,9 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                     ),
                   )
                 : const Icon(Icons.satellite_alt),
-            label: Text(
-                _isCheckingWeather ? 'Checking...' : 'Check Weather Now'),
+            label: Text(_isCheckingWeather
+                ? 'claims.checking'.tr()
+                : 'claims.check_weather_btn'.tr()),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               backgroundColor: AppColors.primary,
@@ -806,7 +900,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
           OutlinedButton.icon(
             onPressed: () => setState(() => _currentStep = 1),
             icon: const Icon(Icons.edit_note),
-            label: const Text('File Claim Manually'),
+            label: Text('claims.file_claim_manually'.tr()),
           ),
         ],
 
@@ -826,7 +920,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => _acknowledgeAlert(false),
-                    child: const Text('No Damage'),
+                    child: Text('claims.no_damage_btn'.tr()),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -834,7 +928,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                   child: ElevatedButton.icon(
                     onPressed: () => _acknowledgeAlert(true),
                     icon: const Icon(Icons.warning_amber),
-                    label: const Text('Yes, Damaged'),
+                    label: Text('claims.yes_damaged_btn'.tr()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.error,
                     ),
@@ -845,16 +939,16 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
           ] else ...[
             _buildInfoCard(
               icon: Icons.check_circle,
-              title: 'Weather Normal',
-              subtitle:
-                  _weatherResult?['message'] ?? 'No extreme weather detected.',
+              title: 'claims.weather_normal_title'.tr(),
+              subtitle: _weatherResult?['message'] ??
+                  'claims.extreme_weather_detected'.tr(),
               color: AppColors.success,
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () => setState(() => _currentStep = 1),
               icon: const Icon(Icons.edit_note),
-              label: const Text('File Claim Manually Anyway'),
+              label: Text('claims.file_claim_manually_anyway'.tr()),
             ),
           ],
         ],
@@ -890,7 +984,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  _weatherResult?['location'] ?? 'Your Location',
+                  _weatherResult?['location'] ?? 'claims.your_location'.tr(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
@@ -903,13 +997,14 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _weatherStat('🌡️', '${weather['temp_c'] ?? '-'}°C', 'Temp'),
               _weatherStat(
-                  '💧', '${weather['humidity'] ?? '-'}%', 'Humidity'),
-              _weatherStat(
-                  '🌧️', '${weather['precip_mm'] ?? '-'}mm', 'Rain'),
-              _weatherStat(
-                  '💨', '${weather['wind_kph'] ?? '-'}km/h', 'Wind'),
+                  '🌡️', '${weather['temp_c'] ?? '-'}°C', 'claims.temp'.tr()),
+              _weatherStat('💧', '${weather['humidity'] ?? '-'}%',
+                  'claims.humidity'.tr()),
+              _weatherStat('🌧️', '${weather['precip_mm'] ?? '-'}mm',
+                  'claims.rain'.tr()),
+              _weatherStat('💨', '${weather['wind_kph'] ?? '-'}km/h',
+                  'claims.wind'.tr()),
             ],
           ),
           const SizedBox(height: 8),
@@ -966,7 +1061,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '⚠️ Weather Alert: ${(alert['type'] ?? '').toString().toUpperCase()}',
+                  '⚠️ ${'claims.weather_alert'.tr()}: ${(alert['type'] ?? '').toString().toUpperCase()}',
                   style: const TextStyle(
                     color: AppColors.error,
                     fontWeight: FontWeight.bold,
@@ -978,7 +1073,9 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            alert['message'] ?? alert['details'] ?? 'Extreme weather detected!',
+            alert['message'] ??
+                alert['details'] ??
+                'claims.extreme_weather_detected'.tr(),
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,
@@ -992,7 +1089,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              'Severity: ${alert['severity'] ?? 'High'}',
+              '${'claims.severity'.tr()}: ${alert['severity'] ?? 'High'}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -1012,9 +1109,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
       children: [
         _buildInfoCard(
           icon: Icons.description,
-          title: 'PMFBY Claim Form',
-          subtitle:
-              'Fill in the details below. Your personal info will be auto-filled from your profile.',
+          title: 'claims.pmfby_form_title'.tr(),
+          subtitle: 'claims.pmfby_form_desc'.tr(),
           color: AppColors.primary,
         ),
         const SizedBox(height: 20),
@@ -1022,21 +1118,29 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
         // Loss Type Dropdown
         DropdownButtonFormField<String>(
           value: _selectedLossType,
-          decoration: const InputDecoration(
-            labelText: 'Type of Loss',
-            prefixIcon: Icon(Icons.category),
+          decoration: InputDecoration(
+            labelText: 'claims.loss_type_label'.tr(),
+            prefixIcon: const Icon(Icons.category),
           ),
-          items: const [
-            DropdownMenuItem(value: 'flood', child: Text('Flood')),
-            DropdownMenuItem(value: 'drought', child: Text('Drought')),
-            DropdownMenuItem(value: 'hailstorm', child: Text('Hailstorm')),
+          items: [
             DropdownMenuItem(
-                value: 'heavy_rain', child: Text('Heavy Rainfall')),
-            DropdownMenuItem(value: 'cyclone', child: Text('Cyclone')),
-            DropdownMenuItem(value: 'frost', child: Text('Frost')),
+                value: 'flood', child: Text('claims.loss_flood'.tr())),
             DropdownMenuItem(
-                value: 'pest_attack', child: Text('Pest Attack')),
-            DropdownMenuItem(value: 'other', child: Text('Other')),
+                value: 'drought', child: Text('claims.loss_drought'.tr())),
+            DropdownMenuItem(
+                value: 'hailstorm', child: Text('claims.loss_hailstorm'.tr())),
+            DropdownMenuItem(
+                value: 'heavy_rain',
+                child: Text('claims.loss_heavy_rain'.tr())),
+            DropdownMenuItem(
+                value: 'cyclone', child: Text('claims.loss_cyclone'.tr())),
+            DropdownMenuItem(
+                value: 'frost', child: Text('claims.loss_frost'.tr())),
+            DropdownMenuItem(
+                value: 'pest_attack',
+                child: Text('claims.loss_pest_attack'.tr())),
+            DropdownMenuItem(
+                value: 'other', child: Text('claims.loss_other'.tr())),
           ],
           onChanged: (v) => setState(() => _selectedLossType = v ?? 'flood'),
         ),
@@ -1045,10 +1149,10 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
         // Survey Number
         TextField(
           controller: _surveyNumberController,
-          decoration: const InputDecoration(
-            labelText: 'Survey Number (from 7/12 Extract)',
-            prefixIcon: Icon(Icons.pin),
-            hintText: 'e.g., 123/4',
+          decoration: InputDecoration(
+            labelText: 'claims.survey_number_label'.tr(),
+            prefixIcon: const Icon(Icons.pin),
+            hintText: 'claims.survey_number_hint'.tr(),
           ),
         ),
         const SizedBox(height: 16),
@@ -1057,10 +1161,10 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
         TextField(
           controller: _areaController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Area Affected (acres)',
-            prefixIcon: Icon(Icons.landscape),
-            hintText: 'e.g., 2.5',
+          decoration: InputDecoration(
+            labelText: 'claims.area_affected_label'.tr(),
+            prefixIcon: const Icon(Icons.landscape),
+            hintText: 'claims.area_affected_hint'.tr(),
           ),
         ),
         const SizedBox(height: 16),
@@ -1069,10 +1173,10 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
         TextField(
           controller: _descriptionController,
           maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: 'Damage Description',
-            prefixIcon: Icon(Icons.text_snippet),
-            hintText: 'Describe the damage to your crops...',
+          decoration: InputDecoration(
+            labelText: 'claims.damage_desc_label'.tr(),
+            prefixIcon: const Icon(Icons.text_snippet),
+            hintText: 'claims.damage_desc_hint'.tr(),
             alignLabelWithHint: true,
           ),
         ),
@@ -1092,7 +1196,9 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                 )
               : const Icon(Icons.auto_fix_high),
           label: Text(
-            _isCreatingClaim ? 'Creating...' : 'Generate Claim Form',
+            _isCreatingClaim
+                ? 'claims.creating'.tr()
+                : 'claims.generate_claim_btn'.tr(),
           ),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1109,9 +1215,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
       children: [
         _buildInfoCard(
           icon: Icons.camera_alt,
-          title: 'Upload Crop Damage Photos',
-          subtitle:
-              'Take photos of the damaged crops. Photos with location data help strengthen your claim.',
+          title: 'claims.upload_photos_title'.tr(),
+          subtitle: 'claims.upload_photos_desc'.tr(),
           color: AppColors.secondary,
         ),
         const SizedBox(height: 20),
@@ -1142,7 +1247,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
               ),
               const SizedBox(width: 8),
               Text(
-                '$_uploadedPhotoCount photo(s) uploaded',
+                '$_uploadedPhotoCount ${'claims.photos_uploaded'.tr()}',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: _uploadedPhotoCount >= 1
@@ -1152,9 +1257,9 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
               ),
               if (_uploadedPhotoCount < 1) ...[
                 const Spacer(),
-                const Text(
-                  'Min 1 required',
-                  style: TextStyle(
+                Text(
+                  'claims.min_required'.tr(),
+                  style: const TextStyle(
                     color: AppColors.warning,
                     fontSize: 12,
                   ),
@@ -1219,7 +1324,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                         ),
                       )
                     : const Icon(Icons.camera_alt),
-                label: const Text('Camera'),
+                label: Text('claims.camera'.tr()),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   backgroundColor: AppColors.primary,
@@ -1231,7 +1336,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
               child: OutlinedButton.icon(
                 onPressed: _isUploadingPhoto ? null : _pickFromGallery,
                 icon: const Icon(Icons.photo_library),
-                label: const Text('Gallery'),
+                label: Text('claims.gallery'.tr()),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
@@ -1247,7 +1352,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
           ElevatedButton.icon(
             onPressed: () => _goToStep(3),
             icon: const Icon(Icons.arrow_forward),
-            label: const Text('Next: Attach Documents'),
+            label: Text('claims.next_attach_docs'.tr()),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
@@ -1263,23 +1368,23 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
       children: [
         _buildInfoCard(
           icon: Icons.folder_open,
-          title: 'Attach Required Documents',
-          subtitle: 'We automatically pull documents from your uploaded vault.',
+          title: 'claims.attach_docs_title'.tr(),
+          subtitle: 'claims.attach_docs_desc'.tr(),
           color: AppColors.info,
         ),
         const SizedBox(height: 20),
 
         // Loading state
         if (_isAttachingDocs)
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.all(32),
+              padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
-                  CircularProgressIndicator(color: AppColors.primary),
-                  SizedBox(height: 12),
-                  Text('Auto-attaching documents from your vault...',
-                    style: TextStyle(color: AppColors.textSecondary)),
+                  const CircularProgressIndicator(color: AppColors.primary),
+                  const SizedBox(height: 12),
+                  Text('claims.auto_attaching'.tr(),
+                      style: const TextStyle(color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -1315,8 +1420,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                 Expanded(
                   child: Text(
                     _docsResult?['data']?['documents_complete'] == true
-                        ? 'All required documents found and attached!'
-                        : 'Some documents are missing from your vault',
+                        ? 'claims.all_docs_found'.tr()
+                        : 'claims.some_docs_missing'.tr(),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: _docsResult?['data']?['documents_complete'] == true
@@ -1334,19 +1439,26 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
           if (_docsResult?['data']?['attached'] != null)
             ...(_docsResult!['data']['attached'] as List).map((doc) {
               final name = doc['document_type'] ?? doc.toString();
-              return _buildDocRow(DocumentType.getDisplayName(name), Icons.check_circle, AppColors.success, null);
+              return _buildDocRow(DocumentType.getDisplayName(name),
+                  Icons.check_circle, AppColors.success, null);
             }),
 
           // Show missing documents with upload buttons
           if (_docsResult?['data']?['missing'] != null &&
               (_docsResult!['data']['missing'] as List).isNotEmpty) ...[
             const SizedBox(height: 8),
-            const Text('Missing Documents:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.error),
+            Text(
+              'claims.missing_documents'.tr(),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppColors.error),
             ),
             const SizedBox(height: 8),
             ...(_docsResult!['data']['missing'] as List).map((docType) {
-              final name = docType is Map ? docType['document_type'] ?? docType.toString() : docType.toString();
+              final name = docType is Map
+                  ? docType['document_type'] ?? docType.toString()
+                  : docType.toString();
               return _buildDocRow(
                 DocumentType.getDisplayName(name),
                 Icons.warning_amber_rounded,
@@ -1362,12 +1474,14 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
 
           // Re-attach button
           OutlinedButton.icon(
-            onPressed: _isAttachingDocs ? null : () {
-              _autoAttachTriggered = false;
-              _attachDocuments();
-            },
+            onPressed: _isAttachingDocs
+                ? null
+                : () {
+                    _autoAttachTriggered = false;
+                    _attachDocuments();
+                  },
             icon: const Icon(Icons.refresh),
-            label: const Text('Re-scan Documents'),
+            label: Text('claims.rescan_docs'.tr()),
           ),
 
           const SizedBox(height: 12),
@@ -1376,7 +1490,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
           ElevatedButton.icon(
             onPressed: () => _goToStep(4),
             icon: const Icon(Icons.arrow_forward),
-            label: const Text('Next: Review & Submit'),
+            label: Text('claims.next_review_submit'.tr()),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
@@ -1388,7 +1502,7 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
           ElevatedButton.icon(
             onPressed: _attachDocuments,
             icon: const Icon(Icons.attach_file),
-            label: const Text('Attach Documents from Vault'),
+            label: Text('claims.attach_from_vault'.tr()),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
@@ -1397,7 +1511,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     );
   }
 
-  Widget _buildDocRow(String name, IconData icon, Color color, VoidCallback? onUpload) {
+  Widget _buildDocRow(
+      String name, IconData icon, Color color, VoidCallback? onUpload) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1415,14 +1530,19 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
             TextButton.icon(
               onPressed: onUpload,
               icon: const Icon(Icons.upload_file, size: 16),
-              label: const Text('Upload', style: TextStyle(fontSize: 12)),
+              label: Text('claims.upload'.tr(),
+                  style: const TextStyle(fontSize: 12)),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 foregroundColor: AppColors.primary,
               ),
             ),
           if (color == AppColors.success)
-            const Text('Attached', style: TextStyle(color: AppColors.success, fontSize: 12, fontWeight: FontWeight.w500)),
+            Text('claims.attached'.tr(),
+                style: const TextStyle(
+                    color: AppColors.success,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -1435,51 +1555,64 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
       children: [
         _buildInfoCard(
           icon: Icons.rate_review,
-          title: 'Claim Preview',
-          subtitle: 'Review all your claim details before final submission.',
+          title: 'claims.claim_preview_title'.tr(),
+          subtitle: 'claims.claim_preview_desc'.tr(),
           color: AppColors.primaryDark,
         ),
         const SizedBox(height: 20),
 
         // ── Section 1: Weather Data ──
         _buildPreviewSection(
-          'Weather & Alert',
+          'claims.section_weather_alert'.tr(),
           Icons.cloud,
           AppColors.info,
           [
-            _summaryRow('Location', _weatherResult?['location'] ?? '-'),
-            _summaryRow('Condition', _weatherResult?['weather']?['condition_text'] ?? '-'),
-            _summaryRow('Temperature', '${_weatherResult?['weather']?['temp_c'] ?? '-'}°C'),
+            _summaryRow('claims.label_location'.tr(),
+                _weatherResult?['location'] ?? '-'),
+            _summaryRow('claims.label_condition'.tr(),
+                _weatherResult?['weather']?['condition_text'] ?? '-'),
+            _summaryRow('claims.label_temperature'.tr(),
+                '${_weatherResult?['weather']?['temp_c'] ?? '-'}°C'),
             if (_alertDetected)
-              _summaryRow('Alert Type', _selectedLossType.replaceAll('_', ' ').toUpperCase()),
+              _summaryRow('claims.label_alert_type'.tr(),
+                  _selectedLossType.replaceAll('_', ' ').toUpperCase()),
           ],
         ),
         const SizedBox(height: 12),
 
         // ── Section 2: Claim Details ──
         _buildPreviewSection(
-          'Claim Details',
+          'claims.section_claim_details'.tr(),
           Icons.description,
           AppColors.primary,
           [
-            _summaryRow('Claim ID', _claimReadableId ?? '-'),
-            _summaryRow('Scheme', 'Pradhan Mantri Fasal Bima Yojana'),
-            _summaryRow('Loss Type', _selectedLossType.replaceAll('_', ' ').toUpperCase()),
-            _summaryRow('Area Affected', '${_areaController.text} acres'),
-            _summaryRow('Survey Number', _surveyNumberController.text.isNotEmpty ? _surveyNumberController.text : '-'),
+            _summaryRow('claims.label_claim_id'.tr(), _claimReadableId ?? '-'),
+            _summaryRow(
+                'claims.label_scheme'.tr(), 'claims.pmfby_scheme_name'.tr()),
+            _summaryRow('claims.label_loss_type'.tr(),
+                _selectedLossType.replaceAll('_', ' ').toUpperCase()),
+            _summaryRow('claims.label_area_affected'.tr(),
+                '${_areaController.text} ${'claims.acres'.tr()}'),
+            _summaryRow(
+                'claims.label_survey_number'.tr(),
+                _surveyNumberController.text.isNotEmpty
+                    ? _surveyNumberController.text
+                    : '-'),
             if (_descriptionController.text.isNotEmpty)
-              _summaryRow('Description', _descriptionController.text),
+              _summaryRow(
+                  'claims.label_description'.tr(), _descriptionController.text),
           ],
         ),
         const SizedBox(height: 12),
 
         // ── Section 3: Evidence Photos ──
         _buildPreviewSection(
-          'Evidence Photos',
+          'claims.section_evidence'.tr(),
           Icons.camera_alt,
           AppColors.secondary,
           [
-            _summaryRow('Photos Uploaded', '$_uploadedPhotoCount'),
+            _summaryRow(
+                'claims.label_photos_uploaded'.tr(), '$_uploadedPhotoCount'),
           ],
         ),
         if (_evidencePhotos.isNotEmpty) ...[
@@ -1510,7 +1643,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                         color: AppColors.success,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.check, color: Colors.white, size: 12),
+                      child: const Icon(Icons.check,
+                          color: Colors.white, size: 12),
                     ),
                   ),
                 );
@@ -1522,33 +1656,41 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
 
         // ── Section 4: Documents ──
         _buildPreviewSection(
-          'Documents',
+          'claims.section_documents'.tr(),
           Icons.folder,
           _docsResult?['data']?['documents_complete'] == true
               ? AppColors.success
               : AppColors.warning,
           [
-            _summaryRow('Status',
+            _summaryRow(
+              'claims.label_status'.tr(),
               _docsResult?['data']?['documents_complete'] == true
-                  ? 'All attached ✅'
-                  : 'Partially attached ⚠️',
+                  ? 'claims.status_all_attached'.tr()
+                  : 'claims.status_partially'.tr(),
             ),
-            _summaryRow('Attached Count', '${_docsResult?['data']?['attached_count'] ?? 0}'),
+            _summaryRow('claims.label_attached_count'.tr(),
+                '${_docsResult?['data']?['attached_count'] ?? 0}'),
             if (_docsResult?['data']?['missing'] != null &&
                 (_docsResult!['data']['missing'] as List).isNotEmpty)
-              _summaryRow('Missing', (_docsResult!['data']['missing'] as List).join(', ')),
+              _summaryRow('claims.label_missing'.tr(),
+                  (_docsResult!['data']['missing'] as List).join(', ')),
           ],
         ),
         const SizedBox(height: 12),
 
         // ── Section 5: Deadline ──
         _buildPreviewSection(
-          'Deadline',
+          'claims.section_deadline'.tr(),
           _hoursRemaining < 24 ? Icons.timer_off : Icons.timer,
           _hoursRemaining < 24 ? AppColors.error : AppColors.primary,
           [
-            _summaryRow('Time Remaining', '${_hoursRemaining.toStringAsFixed(1)} hours'),
-            _summaryRow('Status', _hoursRemaining < 24 ? '⚠️ Urgent' : '✅ Within deadline'),
+            _summaryRow('claims.label_time_remaining'.tr(),
+                '${_hoursRemaining.toStringAsFixed(1)} ${'claims.hours_remaining'.tr()}'),
+            _summaryRow(
+                'claims.label_status'.tr(),
+                _hoursRemaining < 24
+                    ? 'claims.status_urgent'.tr()
+                    : 'claims.status_within_deadline'.tr()),
           ],
         ),
         const SizedBox(height: 24),
@@ -1567,7 +1709,9 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
                 )
               : const Icon(Icons.send_rounded),
           label: Text(
-            _isSubmitting ? 'Submitting...' : 'Submit Claim for Verification',
+            _isSubmitting
+                ? 'claims.submitting'.tr()
+                : 'claims.submit_claim_btn'.tr(),
           ),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1590,9 +1734,9 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'PMFBY Claim JSON Output:',
-                  style: TextStyle(
+                Text(
+                  'claims.pmfby_json_output'.tr(),
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -1614,7 +1758,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
     );
   }
 
-  Widget _buildPreviewSection(String title, IconData icon, Color color, List<Widget> children) {
+  Widget _buildPreviewSection(
+      String title, IconData icon, Color color, List<Widget> children) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1636,7 +1781,8 @@ class _InsuranceClaimScreenState extends State<InsuranceClaimScreen>
             children: [
               Icon(icon, color: color, size: 18),
               const SizedBox(width: 8),
-              Text(title,
+              Text(
+                title,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,

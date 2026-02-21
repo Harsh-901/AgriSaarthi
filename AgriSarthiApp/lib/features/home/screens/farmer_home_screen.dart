@@ -29,6 +29,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
   String _farmerName = 'Farmer';
   bool _isLoadingName = true;
   late Future<List<SchemeModel>> _schemesFuture;
+  Set<String> _appliedSchemeIds = {};
 
   Locale? _currentLocale;
 
@@ -44,6 +45,30 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
     });
   }
 
+  /// Fetch the set of scheme IDs this farmer has already applied for
+  Future<Set<String>> _fetchAppliedSchemeIds() async {
+    try {
+      final result = await _applicationService.getApplications();
+      if (result['success'] == true && result['applications'] != null) {
+        final applications = result['applications'] as List<ApplicationModel>;
+        // Try matching by schemeId first, fall back to schemeName
+        final ids = <String>{};
+        for (final app in applications) {
+          if (app.schemeId != null && app.schemeId!.isNotEmpty) {
+            ids.add(app.schemeId!);
+          }
+          // Also store scheme name for fallback matching
+          ids.add(app.schemeName);
+        }
+        debugPrint('Applied scheme IDs loaded: $ids');
+        return ids;
+      }
+    } catch (e) {
+      debugPrint('Error loading applied scheme IDs: $e');
+    }
+    return {};
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -51,9 +76,37 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
     final newLocale = context.locale;
     if (_currentLocale != newLocale) {
       _currentLocale = newLocale;
-      _schemesFuture =
-          _schemeService.getEligibleSchemes(languageCode: newLocale.languageCode);
+      _schemesFuture = _loadSchemesWithAppliedStatus(newLocale.languageCode);
     }
+  }
+
+  /// Load schemes and mark which ones user already applied for
+  /// Fetches both applied IDs and schemes in parallel to avoid race conditions
+  Future<List<SchemeModel>> _loadSchemesWithAppliedStatus(
+      String languageCode) async {
+    // Fetch both in parallel
+    final results = await Future.wait([
+      _fetchAppliedSchemeIds(),
+      _schemeService.getEligibleSchemes(languageCode: languageCode),
+    ]);
+
+    final appliedIds = results[0] as Set<String>;
+    final schemes = results[1] as List<SchemeModel>;
+
+    _appliedSchemeIds = appliedIds;
+
+    debugPrint('Schemes count: ${schemes.length}, Applied IDs: $appliedIds');
+
+    // Cross-reference: match by scheme ID or by original English name
+    return schemes.map((scheme) {
+      final applied =
+          appliedIds.contains(scheme.id) || appliedIds.contains(scheme.name);
+      if (applied) {
+        debugPrint(
+            'Marking scheme as applied: ${scheme.name} (id: ${scheme.id})');
+      }
+      return applied ? scheme.copyWith(isApplied: true) : scheme;
+    }).toList();
   }
 
   /// Set up the voice provider's navigation callback
@@ -246,6 +299,14 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
 
     if (result['success'] == true) {
       final trackingId = result['data']?['tracking_id'] ?? '';
+      // Refresh schemes list (will re-fetch applied IDs too)
+      if (mounted) {
+        setState(() {
+          _schemesFuture = _loadSchemesWithAppliedStatus(
+              _currentLocale?.languageCode ?? 'en');
+        });
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -527,24 +588,52 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
               const SizedBox(width: 8),
               _buildStatusBadge(scheme.status),
               const Spacer(),
-              // Apply Button
-              ElevatedButton(
-                onPressed: () => _applyForScheme(scheme),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
+              // Apply Button or Applied label
+              if (scheme.isApplied)
+                Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                  shape: RoundedRectangleBorder(
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
+                    border:
+                        Border.all(color: AppColors.success.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check_circle,
+                          color: AppColors.success, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Applied',
+                        style: TextStyle(
+                          color: AppColors.success,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                ElevatedButton(
+                  onPressed: () => _applyForScheme(scheme),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    'home.apply_button'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
-                child: Text(
-                  'home.apply_button'.tr(),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
             ],
           ),
         ],
@@ -740,7 +829,6 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
       ),
     );
   }
-
 
   Widget _buildLanguageOption(
       BuildContext dialogContext, String name, String code) {
