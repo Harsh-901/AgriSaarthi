@@ -1,0 +1,32 @@
+{
+    "app_title": "AgriSarthi",
+    "home": {
+        "greeting": "Hello",
+        "schemes_title": "પાત્ર યોજનાઓ",
+        "apply_button": "અરજી કરો",
+        "status_open": "ખુલ્લું",
+        "status_closed": "બંધ",
+        "status_eligible": "પાત્ર",
+        "status_closing_soon": "Closing Soon",
+        "status_label": "સ્થિતિ:",
+        "benefits": "Benefits",
+        "deadline": "Deadline"
+    },
+    "menu": {
+        "home": "Home",
+        "apps": "એપ્લિકેશન્સ",
+        "docs": "દસ્તાવેજો",
+        "profile": "Profile",
+        "logout": "Logout",
+        "change_language": "Change Language"
+    },
+    "messages": {
+        "coming_soon": "ટૂંક સમયમાં",
+        "logout_confirm": "શું તમે લોગઆઉટ કરવા માંગો છો?",
+        "cancel": "Cancel"
+    },
+    "features": {
+        "videos": "Videos",
+        "notifications": "Notifications"
+    }
+}

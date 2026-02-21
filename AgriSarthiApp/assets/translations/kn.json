@@ -1,0 +1,32 @@
+{
+    "app_title": "ಕೃಷಿ ಗೋಷ್ಠಿ",
+    "home": {
+        "greeting": "Hello",
+        "schemes_title": "Eligible Schemes",
+        "apply_button": "Apply",
+        "status_open": "Open",
+        "status_closed": "Closed",
+        "status_eligible": "ಅರ್ಹ",
+        "status_closing_soon": "ಶೀಘ್ರದಲ್ಲಿ ಮುಗಿಯುವ",
+        "status_label": "Status:",
+        "benefits": "Benefits",
+        "deadline": "ಗಡುವು"
+    },
+    "menu": {
+        "home": "ಮುಖಪುటం",
+        "apps": "Apps",
+        "docs": "Docs",
+        "profile": "Profile",
+        "logout": "Logout",
+        "change_language": "ಭಾಷೆ ಬದಲಾಯಿಸಿ"
+    },
+    "messages": {
+        "coming_soon": "Coming Soon",
+        "logout_confirm": "Are you sure you want to logout?",
+        "cancel": "Cancel"
+    },
+    "features": {
+        "videos": "Videos",
+        "notifications": "ಅಧಿಸೂಚನೆಗಳು"
+    }
+}

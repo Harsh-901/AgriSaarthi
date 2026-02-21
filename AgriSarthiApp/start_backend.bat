@@ -1,0 +1,13 @@
+@echo off
+echo Starting AgriSarthi Backend...
+cd ..\Agrisarthi
+
+echo Installing dependencies...
+python -m pip install -r requirements.txt
+
+echo Applying migrations...
+python manage.py migrate
+
+echo Starting server...
+python manage.py runserver 0.0.0.0:8000
+pause

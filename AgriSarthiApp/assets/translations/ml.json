@@ -1,0 +1,32 @@
+{
+    "app_title": "അഗ്രിസാർത്തി",
+    "home": {
+        "greeting": "Hello",
+        "schemes_title": "Eligible Schemes",
+        "apply_button": "Apply",
+        "status_open": "തുറന്ന",
+        "status_closed": "നിഷ്‌ക്രിയ",
+        "status_eligible": "Eligible",
+        "status_closing_soon": "Closing Soon",
+        "status_label": "Status:",
+        "benefits": "ആനുകൂല്യങ്ങള്",
+        "deadline": "Deadline"
+    },
+    "menu": {
+        "home": "Home",
+        "apps": "Apps",
+        "docs": "Docs",
+        "profile": "Profile",
+        "logout": "ലോഗ് ഔട്ട്",
+        "change_language": "ഭാഷ മാറ്റുക"
+    },
+    "messages": {
+        "coming_soon": "Coming Soon",
+        "logout_confirm": "Are you sure you want to logout?",
+        "cancel": "Cancel"
+    },
+    "features": {
+        "videos": "വീഡിയോകള്‍",
+        "notifications": "Notifications"
+    }
+}

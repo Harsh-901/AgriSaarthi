@@ -1,0 +1,91 @@
+{
+    "app_title": "कृषि सारथी",
+    "common": {
+        "loading": "लोड हो रहा है...",
+        "error": "कुछ गलत हो गया",
+        "retry": "पुनः प्रयास करें",
+        "submit": "जमा करें",
+        "cancel": "रद्द करें",
+        "ok": "ठीक है",
+        "save": "सहेजें",
+        "delete": "हटाएं",
+        "edit": "संपादित करें",
+        "view": "देखें",
+        "get_started": "शुरू करें"
+    },
+    "auth": {
+        "login_title": "लॉग इन",
+        "phone_placeholder": "मोबाइल नंबर दर्ज करें",
+        "otp_placeholder": "ओटीपी दर्ज करें",
+        "get_otp": "ओटीपी प्राप्त करें",
+        "verify": "सत्यापित करें",
+        "resend_otp": "ओटीपी पुनः भेजें",
+        "logout_confirm": "क्या आप लॉग आउट करना चाहते हैं?",
+        "phone_hint": "अपना 10 अंकों का मोबाइल नंबर दर्ज करें",
+        "otp_sent_hint": "आपके फ़ोन पर भेजा गया 6 अंकों का कोड दर्ज करें",
+        "login_farmer": "किसान लॉगिन",
+        "login_admin": "व्यवस्थापक लॉगिन",
+        "tagline": "अन्नदाता को समर्पित - एक किसान कल्याण ऐप",
+        "admin_access": "व्यवस्थापक प्रवेश",
+        "admin_login_badge": "व्यवस्थापक लॉगिन",
+        "email_phone_hint": "ईमेल या फोन नंबर",
+        "password_hint": "पासवर्ड",
+        "back_to_farmer": "किसान लॉगिन पर वापस जाएं",
+        "phone_label": "फोन नंबर",
+        "verify_otp": "ओटीपी सत्यापित करें"
+    },
+    "home": {
+        "greeting": "नमस्ते",
+        "schemes_title": "पात्र योजनाएं",
+        "status_label": "स्थिति:",
+        "status_open": "खुल गया",
+        "status_closed": "बंद",
+        "status_eligible": "पात्र",
+        "status_closing_soon": "जल्द बंद हो रहा है",
+        "benefits": "लाभ",
+        "deadline": "समय सीमा",
+        "apply_button": "आवेदन करें",
+        "view_all": "सभी देखें"
+    },
+    "menu": {
+        "home": "होम",
+        "apps": "आवेदन",
+        "docs": "दस्तावेज़",
+        "profile": "प्रोफाइल",
+        "change_language": "भाषा बदलें",
+        "logout": "लॉग आउट",
+        "help": "मदद",
+        "videos": "वीडियो",
+        "notifications": "सूचनाएं"
+    },
+    "profile": {
+        "title": "मेरी प्रोफाइल",
+        "name": "नाम",
+        "phone": "फ़ोन नंबर",
+        "address": "पता",
+        "state": "राज्य",
+        "district": "ज़िला",
+        "sub_district": "तहसील/तालुका",
+        "village": "गाँव",
+        "land_details": "भूमि विवरण",
+        "save_success": "प्रोफाइल सफलतापुर्वक अपडेट की गई!"
+    },
+    "documents": {
+        "title": "मेरे दस्तावेज़",
+        "upload_new": "नया दस्तावेज़ अपलोड करें",
+        "no_docs": "अभी तक कोई दस्तावेज़ अपलोड नहीं किया गया।",
+        "analysis_pending": "विश्लेषण लंबित",
+        "verified": "सत्यापित"
+    },
+    "voice": {
+        "listening": "सुन रहा हूँ...",
+        "processing": "प्रोसेस हो रहा है...",
+        "speak_now": "अब बोलें",
+        "try_again": "पुनः प्रयास करें"
+    },
+    "messages": {
+        "coming_soon": "जल्द आ रहा है",
+        "application_submitted": "आवेदन सफलतापूर्वक जमा किया गया!",
+        "network_error": "कृपया अपना इंटरनेट कनेक्शन जांचें।"
+    }
+}

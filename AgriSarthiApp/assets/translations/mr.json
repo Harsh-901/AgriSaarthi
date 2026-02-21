@@ -1,0 +1,91 @@
+{
+    "app_title": "कृषी सारथी",
+    "common": {
+        "loading": "लोड होत आहे...",
+        "error": "काहीतरी चूक झाली",
+        "retry": "पुन्हा प्रयत्न करा",
+        "submit": "सादर करा",
+        "cancel": "रद्द करा",
+        "ok": "ठीक आहे",
+        "save": "जतन करा",
+        "delete": "हटवा",
+        "edit": "संपादित करा",
+        "view": "पहा",
+        "get_started": "सुरू करा"
+    },
+    "auth": {
+        "login_title": "लॉगिन",
+        "phone_placeholder": "मोबाईल नंबर प्रविष्ट करा",
+        "otp_placeholder": "OTP प्रविष्ट करा",
+        "get_otp": "OTP मिळवा",
+        "verify": "सत्यापित करा",
+        "resend_otp": "OTP पुन्हा पाठवा",
+        "logout_confirm": "तुम्हाला खात्री आहे की तुम्ही लॉग आउट करू इच्छिता?",
+        "phone_hint": "तुमचा 10-अंकी मोबाईल नंबर टाका",
+        "otp_sent_hint": "तुमच्या मोबाईलवर पाठवलेला 6-अंकी कोड टाका",
+        "login_farmer": "शेतकरी लॉगिन",
+        "login_admin": "व्यवस्थापक लॉगिन",
+        "tagline": "अन्नदात्यासाठी समर्पित - एक शेतकरी कल्याण ॲप",
+        "admin_access": "व्यवस्थापक प्रवेश",
+        "admin_login_badge": "व्यवस्थापक लॉगिन",
+        "email_phone_hint": "ईमेल किंवा फोन नंबर",
+        "password_hint": "पासवर्ड",
+        "back_to_farmer": "शेतकरी लॉगिनवर परत या",
+        "phone_label": "फोन नंबर",
+        "verify_otp": "ओटीपी सत्यापित करा"
+    },
+    "home": {
+        "greeting": "नमस्कार",
+        "schemes_title": "पात्र योजना",
+        "status_label": "स्थिती:",
+        "status_open": "सुरू",
+        "status_closed": "बंद",
+        "status_eligible": "पात्र",
+        "status_closing_soon": "लवकरच बंद होत आहे",
+        "benefits": "फायदे",
+        "deadline": "अंतिम मुदत",
+        "apply_button": "अर्ज करा",
+        "view_all": "सर्व पहा"
+    },
+    "menu": {
+        "home": "मुखपृष्ठ",
+        "apps": "अर्ज",
+        "docs": "कागदपत्रे",
+        "profile": "प्रोफाइल",
+        "change_language": "भाषा बदला",
+        "logout": "लॉग आउट",
+        "help": "मदत",
+        "videos": "व्हिडिओ",
+        "notifications": "सूचना"
+    },
+    "profile": {
+        "title": "माझी प्रोफाइल",
+        "name": "नाव",
+        "phone": "फोन नंबर",
+        "address": "पत्ता",
+        "state": "राज्य",
+        "district": "जिल्हा",
+        "sub_district": "तालुका",
+        "village": "गाव",
+        "land_details": "जमिनीचा तपशील",
+        "save_success": "प्रोफाइल यशस्वीरित्या जतन केली!"
+    },
+    "documents": {
+        "title": "माझी कागदपत्रे",
+        "upload_new": "नवीन कागदपत्र अपलोड करा",
+        "no_docs": "अद्याप कोणतीही कागदपत्रे अपलोड केलेली नाहीत.",
+        "analysis_pending": "विश्लेषण प्रलंबित",
+        "verified": "सत्यापित"
+    },
+    "voice": {
+        "listening": "ऐकत आहे...",
+        "processing": "प्रक्रिया करत आहे...",
+        "speak_now": "आता बोला",
+        "try_again": "पुन्हा प्रयत्न करा"
+    },
+    "messages": {
+        "coming_soon": "लवकरच येत आहे",
+        "application_submitted": "अर्ज यशस्वीरित्या सादर केला!",
+        "network_error": "कृपया तुमचे इंटरनेट कनेक्शन तपासा."
+    }
+}

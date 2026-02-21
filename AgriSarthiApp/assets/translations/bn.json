@@ -1,0 +1,32 @@
+{
+    "app_title": "গোরু বাঁধা",
+    "home": {
+        "greeting": "নমস্কার",
+        "schemes_title": "উপযুক্ত ଯୋଜନା",
+        "apply_button": "আবেদন করুন",
+        "status_open": "খোলা",
+        "status_closed": "বন্ধ",
+        "status_eligible": "যোগ্য",
+        "status_closing_soon": "শীঘ্রই সমাপ্তি",
+        "status_label": "অবস্থা:",
+        "benefits": "সুবিধা",
+        "deadline": "সময়সীমা"
+    },
+    "menu": {
+        "home": "গৃহ",
+        "apps": "অ্যাপ",
+        "docs": "নথি",
+        "profile": "প্রোফাইল",
+        "logout": "লগআউট",
+        "change_language": "ভাষা পরিবর্তন"
+    },
+    "messages": {
+        "coming_soon": "শীঘ্রই আসছে",
+        "logout_confirm": "আপনি কি নিশ্চিত যে আপনি লগআউট করতে চান?",
+        "cancel": "বাতিল"
+    },
+    "features": {
+        "videos": "ভিডিও",
+        "notifications": "বিজ্ঞপ্তি"
+    }
+}

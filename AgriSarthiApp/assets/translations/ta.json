@@ -1,0 +1,32 @@
+{
+    "app_title": "விவசாயத்துறையின்",
+    "home": {
+        "greeting": "வணக்கம்",
+        "schemes_title": "தகுதியுள்ள திட்டங்கள்",
+        "apply_button": "விண்ணப்பிக்கவும்",
+        "status_open": "திறக்கப்பட்ட",
+        "status_closed": "மூடப்பட்ட",
+        "status_eligible": "தகுதியுள்ள",
+        "status_closing_soon": "விரைவில் முடிந்துவிடும்",
+        "status_label": "நிலை:",
+        "benefits": "நன்மைகள்",
+        "deadline": "காலக்கெடு"
+    },
+    "menu": {
+        "home": "முகப்பு பக்கம்",
+        "apps": "Apps",
+        "docs": "Docs",
+        "profile": "Profile",
+        "logout": "Logout",
+        "change_language": "Change Language"
+    },
+    "messages": {
+        "coming_soon": "Coming Soon",
+        "logout_confirm": "Are you sure you want to logout?",
+        "cancel": "Cancel"
+    },
+    "features": {
+        "videos": "Videos",
+        "notifications": "Notifications"
+    }
+}

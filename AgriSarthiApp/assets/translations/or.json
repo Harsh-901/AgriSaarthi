@@ -1,0 +1,32 @@
+{
+    "app_title": "ଆଗ୍ରିସାର୍ଥି",
+    "home": {
+        "greeting": "ନମସ୍କାର",
+        "schemes_title": "ଯୋଗ୍ୟ ଯୋଜନା",
+        "apply_button": "ଆବେଦନ କରନ୍ତୁ",
+        "status_open": "ଖୋଲା",
+        "status_closed": "ବନ୍ଦ",
+        "status_eligible": "ଯୋଗ୍ୟ",
+        "status_closing_soon": "ଶୀଘ୍ର ଶେଷ ହେବ",
+        "status_label": "ସ୍ଥିତି:",
+        "benefits": "ସୁବିଧା",
+        "deadline": "ସମୟସୀମା"
+    },
+    "menu": {
+        "home": "ଗୃହ",
+        "apps": "ଆପ୍",
+        "docs": "ଡକ୍ୟୁମେଣ୍ଟ",
+        "profile": "ପ୍ରୋଫାଇଲ୍",
+        "logout": "ଲଗଆଉଟ୍",
+        "change_language": "Change Language"
+    },
+    "messages": {
+        "coming_soon": "ଶୀଘ୍ର ଆସୁଛି",
+        "logout_confirm": "ଆପଣ ଲଗ୍‌ଆଉଟ୍ କରିବାକୁ ନିଶ୍ଚିତ କି?",
+        "cancel": "ବାତିଲ"
+    },
+    "features": {
+        "videos": "ଭିଡିଓ",
+        "notifications": "ବିଜ୍ଞପ୍ତି"
+    }
+}

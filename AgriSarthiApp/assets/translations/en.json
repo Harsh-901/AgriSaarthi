@@ -1,0 +1,91 @@
+{
+    "app_title": "AgriSarthi",
+    "common": {
+        "loading": "Loading...",
+        "error": "Something went wrong",
+        "retry": "Retry",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "ok": "OK",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "view": "View",
+        "get_started": "Get Started"
+    },
+    "auth": {
+        "login_title": "Login",
+        "phone_placeholder": "Enter Mobile Number",
+        "otp_placeholder": "Enter OTP",
+        "get_otp": "Get OTP",
+        "verify": "Verify",
+        "resend_otp": "Resend OTP",
+        "logout_confirm": "Are you sure you want to logout?",
+        "phone_hint": "Enter your 10-digit phone number",
+        "otp_sent_hint": "Enter the 6-digit code sent to your phone",
+        "login_farmer": "Login as Farmer",
+        "login_admin": "Login as Admin",
+        "tagline": "Something for the one who gives us food",
+        "admin_access": "Admin Access",
+        "admin_login_badge": "Administrator Login",
+        "email_phone_hint": "Email or Phone Number",
+        "password_hint": "Password",
+        "back_to_farmer": "Back to Farmer Login",
+        "phone_label": "Phone Number",
+        "verify_otp": "Verify OTP"
+    },
+    "home": {
+        "greeting": "Hello",
+        "schemes_title": "Eligible Schemes",
+        "status_label": "Status:",
+        "status_open": "Open",
+        "status_closed": "Closed",
+        "status_eligible": "Eligible",
+        "status_closing_soon": "Closing Soon",
+        "benefits": "Benefits",
+        "deadline": "Deadline",
+        "apply_button": "Apply",
+        "view_all": "View All"
+    },
+    "menu": {
+        "home": "Home",
+        "apps": "Apps",
+        "docs": "Docs",
+        "profile": "Profile",
+        "change_language": "Change Language",
+        "logout": "Logout",
+        "help": "Help",
+        "videos": "Videos",
+        "notifications": "Notifications"
+    },
+    "profile": {
+        "title": "My Profile",
+        "name": "Name",
+        "phone": "Phone Number",
+        "address": "Address",
+        "state": "State",
+        "district": "District",
+        "sub_district": "Tehsil/Taluka",
+        "village": "Village",
+        "land_details": "Land Details",
+        "save_success": "Profile saved successfully!"
+    },
+    "documents": {
+        "title": "My Documents",
+        "upload_new": "Upload New Document",
+        "no_docs": "No documents uploaded yet.",
+        "analysis_pending": "Analysis Pending",
+        "verified": "Verified"
+    },
+    "voice": {
+        "listening": "Listening...",
+        "processing": "Processing...",
+        "speak_now": "Speak Now",
+        "try_again": "Try Again"
+    },
+    "messages": {
+        "coming_soon": "Coming Soon",
+        "application_submitted": "Application submitted successfully!",
+        "network_error": "Please check your internet connection."
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "app_title": "వ్యవసాయం",
+    "home": {
+        "greeting": "నమస్కారం",
+        "schemes_title": "అర్హమైన పథకాలు",
+        "apply_button": "దరఖాస్తు చేయండి",
+        "status_open": "తెరిచిన",
+        "status_closed": "నిలిపివేయబడిన",
+        "status_eligible": "అర్హమైన",
+        "status_closing_soon": "త్వరలో ముగియనుంది",
+        "status_label": "స్థితి:",
+        "benefits": "ప్రయోజనాలు",
+        "deadline": "గడువు"
+    },
+    "menu": {
+        "home": "స్వదేశం",
+        "apps": "యాప్స్",
+        "docs": "వైద్య పత్రాలు",
+        "profile": "ప్రొఫైల్",
+        "logout": "లాగిన్",
+        "change_language": "భాష మార్చడం"
+    },
+    "messages": {
+        "coming_soon": "త్వరలోనే తెలుస్తుంది",
+        "logout_confirm": "మీరు లాగ్ అవుట్ చేయాలనుకుంటున్నారా?",
+        "cancel": "రద్దు"
+    },
+    "features": {
+        "videos": "వీడియోలు",
+        "notifications": "నోటిఫికేషన్లు"
+    }
+}

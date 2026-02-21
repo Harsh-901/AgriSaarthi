@@ -1,0 +1,32 @@
+{
+    "app_title": "ਸ਼ਰਧਾ",
+    "home": {
+        "greeting": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ",
+        "schemes_title": "ਯੋਗ ਸਕੀਮਾਂ",
+        "apply_button": "ਅਰਜ਼ੀ ਦੇਵਾਂਗਾ।",
+        "status_open": "ਖੁੱਲ੍ਹਾ",
+        "status_closed": "ਬੰਦ",
+        "status_eligible": "ਯੋਗ",
+        "status_closing_soon": "ਸਮਾਪਤੀ ਜਲਦੀ",
+        "status_label": "ਸਥਿਤੀ:",
+        "benefits": "ਫਾਇਦੇ",
+        "deadline": "ਆਖਰੀ ਮਿਤੀ"
+    },
+    "menu": {
+        "home": "ਘਰੇਲੂ",
+        "apps": "ਐਪਸ",
+        "docs": "ਡਾਕ",
+        "profile": "ਜੀਵਨੀ",
+        "logout": "ਲੌਗਆਉਟ",
+        "change_language": "Change Language"
+    },
+    "messages": {
+        "coming_soon": "Coming Soon",
+        "logout_confirm": "Are you sure you want to logout?",
+        "cancel": "ਰੱਦ"
+    },
+    "features": {
+        "videos": "ਵੀਡੀਓਜ਼",
+        "notifications": "ਸੂਚਨਾਵਾਂ"
+    }
+}
