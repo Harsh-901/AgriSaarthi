@@ -123,12 +123,30 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
     }
   }
 
+  /// Load schemes and mark which ones the farmer already applied for
+  Future<List<SchemeModel>> _loadSchemesWithAppliedStatus(String languageCode) async {
+    final results = await Future.wait([
+      _schemeService.getEligibleSchemes(languageCode: languageCode),
+      _fetchAppliedSchemeIds(),
+    ]);
+    final schemes = results[0] as List<SchemeModel>;
+    final appliedIds = results[1] as Set<String>;
+
+    if (mounted) {
+      setState(() => _appliedSchemeIds = appliedIds);
+    }
+
+    return schemes.map((s) {
+      final isApplied = appliedIds.contains(s.id) || appliedIds.contains(s.name);
+      return s.copyWith(isApplied: isApplied);
+    }).toList();
+  }
+
   /// Refresh all home screen data
   Future<void> _refreshSchemes() async {
     final locale = context.locale;
     setState(() {
-      _schemesFuture =
-          _schemeService.getEligibleSchemes(languageCode: locale.languageCode);
+      _schemesFuture = _loadSchemesWithAppliedStatus(locale.languageCode);
       _isLoadingName = true;
     });
     await _loadFarmerName();
