@@ -13,6 +13,7 @@ class SchemeModel {
   final String deadline;
   final SchemeStatus status;
   final String? description;
+  final bool isApplied;
 
   SchemeModel({
     required this.id,
@@ -21,6 +22,7 @@ class SchemeModel {
     required this.deadline,
     required this.status,
     this.description,
+    this.isApplied = false,
   });
 
   factory SchemeModel.fromJson(Map<String, dynamic> json) {
@@ -57,6 +59,7 @@ class SchemeModel {
     String? deadline,
     SchemeStatus? status,
     String? description,
+    bool? isApplied,
   }) {
     return SchemeModel(
       id: id ?? this.id,
@@ -65,6 +68,7 @@ class SchemeModel {
       deadline: deadline ?? this.deadline,
       status: status ?? this.status,
       description: description ?? this.description,
+      isApplied: isApplied ?? this.isApplied,
     );
   }
 }
@@ -116,9 +120,10 @@ class SchemeService {
         return schemes;
       }
 
-      // API call didn't succeed — do NOT fall back to all schemes
-      debugPrint('SchemeService: Eligible API failed (not authenticated or server error). Showing no schemes.');
-      return [];
+      // If API call didn't succeed, fall back to Supabase
+      debugPrint(
+          'SchemeService: Eligible API failed, falling back to Supabase');
+      return getSchemes(languageCode: languageCode);
     } catch (e) {
       debugPrint('SchemeService: Error fetching eligible schemes - $e');
       // Do NOT fall back to all schemes — only show eligibility-filtered results

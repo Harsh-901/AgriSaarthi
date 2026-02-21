@@ -28,6 +28,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 class ApplicationListSerializer(serializers.ModelSerializer):
     """Minimal application info for listings"""
+    scheme_id = serializers.UUIDField(source='scheme.id', read_only=True)
     scheme_name = serializers.CharField(source='scheme.name', read_only=True)
     scheme_name_hindi = serializers.CharField(source='scheme.name_hindi', read_only=True)
     benefit_amount = serializers.DecimalField(
@@ -40,7 +41,7 @@ class ApplicationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = [
-            'id', 'scheme_name', 'scheme_name_hindi',
+            'id', 'scheme_id', 'scheme_name', 'scheme_name_hindi',
             'benefit_amount', 'status', 'status_display',
             'created_at'
         ]

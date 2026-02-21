@@ -28,6 +28,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
   String _farmerName = 'Farmer';
   bool _isLoadingName = true;
   late Future<List<SchemeModel>> _schemesFuture;
+  Set<String> _appliedSchemeIds = {};
 
   Locale? _currentLocale;
 
@@ -41,14 +42,37 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
     });
   }
 
+  /// Fetch the set of scheme IDs this farmer has already applied for
+  Future<Set<String>> _fetchAppliedSchemeIds() async {
+    try {
+      final result = await _applicationService.getApplications();
+      if (result['success'] == true && result['applications'] != null) {
+        final applications = result['applications'] as List<ApplicationModel>;
+        // Try matching by schemeId first, fall back to schemeName
+        final ids = <String>{};
+        for (final app in applications) {
+          if (app.schemeId != null && app.schemeId!.isNotEmpty) {
+            ids.add(app.schemeId!);
+          }
+          // Also store scheme name for fallback matching
+          ids.add(app.schemeName);
+        }
+        debugPrint('Applied scheme IDs loaded: $ids');
+        return ids;
+      }
+    } catch (e) {
+      debugPrint('Error loading applied scheme IDs: $e');
+    }
+    return {};
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final newLocale = context.locale;
     if (_currentLocale != newLocale) {
       _currentLocale = newLocale;
-      _schemesFuture =
-          _schemeService.getEligibleSchemes(languageCode: newLocale.languageCode);
+      _schemesFuture = _loadSchemesWithAppliedStatus(newLocale.languageCode);
     }
   }
 
@@ -244,6 +268,14 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
 
     if (result['success'] == true) {
       final trackingId = result['data']?['tracking_id'] ?? '';
+      // Refresh schemes list (will re-fetch applied IDs too)
+      if (mounted) {
+        setState(() {
+          _schemesFuture = _loadSchemesWithAppliedStatus(
+              _currentLocale?.languageCode ?? 'en');
+        });
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
