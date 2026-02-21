@@ -161,7 +161,7 @@ class VoiceProcessView(APIView):
                 response['Content-Length'] = len(audio_content)
                 
                 # Expose metadata via custom headers
-                response['X-Voice-Metadata'] = json_lib.dumps(metadata, ensure_ascii=False)
+                response['X-Voice-Metadata'] = json_lib.dumps(metadata, ensure_ascii=True)
                 response['X-Voice-Intent'] = parsed.intent.value
                 response['X-Voice-Confidence'] = str(parsed.confidence)
                 response['X-Voice-Response'] = quote(result['response'], safe='')
@@ -288,9 +288,28 @@ class VoiceProcessView(APIView):
     
     def _handle_apply_scheme(self, farmer, language, scheme_mention=None):
         """Handle APPLY_SCHEME intent"""
-        eligible = EligibilityEngine.get_eligible_schemes(farmer)
+        logger.info(f"Voice Apply: farmer={farmer.id}, name={farmer.name}, "
+                     f"profile_complete={farmer.is_profile_complete}, "
+                     f"scheme_mention={scheme_mention}")
+        
+        try:
+            eligible = EligibilityEngine.get_eligible_schemes(farmer)
+            logger.info(f"Voice Apply: eligible count = {len(eligible)}")
+        except Exception as e:
+            logger.error(f"Voice Apply: EligibilityEngine error: {type(e).__name__}: {e}", exc_info=True)
+            eligible = []
         
         if not eligible:
+            logger.warning(f"Voice Apply: No eligible schemes for farmer {farmer.id}. "
+                          f"Checking raw query...")
+            # Debug: check what the raw query returns
+            try:
+                from schemes.services.eligibility_engine import get_eligible_schemes_for_farmer
+                raw_eligible = get_eligible_schemes_for_farmer(farmer)
+                logger.info(f"Voice Apply: Raw eligible schemes = {[s.name for s in raw_eligible]}")
+            except Exception as dbg_err:
+                logger.error(f"Voice Apply: Debug query error: {dbg_err}")
+            
             response = ResponseGenerator.get_response(
                 Intent.APPLY_SCHEME, language, 'not_eligible'
             )
