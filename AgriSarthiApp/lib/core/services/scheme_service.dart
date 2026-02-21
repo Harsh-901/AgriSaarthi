@@ -116,13 +116,13 @@ class SchemeService {
         return schemes;
       }
 
-      // If API call didn't succeed, fall back to Supabase
-      debugPrint('SchemeService: Eligible API failed, falling back to Supabase');
-      return getSchemes(languageCode: languageCode);
+      // API call didn't succeed — do NOT fall back to all schemes
+      debugPrint('SchemeService: Eligible API failed (not authenticated or server error). Showing no schemes.');
+      return [];
     } catch (e) {
       debugPrint('SchemeService: Error fetching eligible schemes - $e');
-      // Fall back to Supabase
-      return getSchemes(languageCode: languageCode);
+      // Do NOT fall back to all schemes — only show eligibility-filtered results
+      return [];
     }
   }
 

@@ -296,13 +296,28 @@ class VoiceProvider with ChangeNotifier {
 
   /// Confirm an action initiated by voice
   Future<Map<String, dynamic>> confirmAction() async {
-    if (_lastAction == null || _lastData == null) return {'success': false};
+    debugPrint('VoiceProvider: confirmAction called — action=$_lastAction, data=$_lastData');
+
+    if (_lastAction == null || _lastData == null) {
+      debugPrint('VoiceProvider: confirmAction — missing action or data');
+      return {'success': false, 'message': 'No pending action to confirm'};
+    }
+
+    final schemeId = _lastData!['scheme_id'] ?? '';
+    debugPrint('VoiceProvider: confirmAction — scheme_id=$schemeId');
+
+    if (schemeId.isEmpty) {
+      debugPrint('VoiceProvider: confirmAction — scheme_id is empty!');
+      return {'success': false, 'message': 'Scheme ID missing from voice response'};
+    }
 
     try {
       final result = await _voiceService.confirmIntent(
         action: _lastAction!,
-        schemeId: _lastData!['scheme_id'] ?? '',
+        schemeId: schemeId,
       );
+
+      debugPrint('VoiceProvider: confirmAction result=$result');
 
       if (result['success'] == true) {
         _lastAction = null;
@@ -313,7 +328,7 @@ class VoiceProvider with ChangeNotifier {
       return result;
     } catch (e) {
       debugPrint('VoiceProvider: Confirm action error: $e');
-      return {'success': false, 'message': 'Confirmation failed'};
+      return {'success': false, 'message': 'Confirmation failed: $e'};
     }
   }
 

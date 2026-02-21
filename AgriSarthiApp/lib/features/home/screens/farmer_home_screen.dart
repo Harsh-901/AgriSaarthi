@@ -106,6 +106,17 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
     }
   }
 
+  /// Refresh all home screen data — pull-to-refresh and refresh button
+  Future<void> _refreshSchemes() async {
+    final locale = context.locale;
+    setState(() {
+      _schemesFuture =
+          _schemeService.getEligibleSchemes(languageCode: locale.languageCode);
+      _isLoadingName = true;
+    });
+    await _loadFarmerName();
+  }
+
   Future<void> _loadFarmerName() async {
     try {
       final profile = await _farmerService.getFarmerProfile();
@@ -302,33 +313,83 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
                 // Insurance Claim Quick Action
                 _buildInsuranceClaimCard(),
 
-                // Schemes List
+                // Schemes List with pull-to-refresh
                 Expanded(
-                  child: FutureBuilder<List<SchemeModel>>(
-                    future: _schemesFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(
-                          child:
-                              Text('Error loading schemes: ${snapshot.error}'),
-                        );
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(
-                          child: Text('No schemes available at the moment.'),
-                        );
-                      }
+                  child: RefreshIndicator(
+                    onRefresh: _refreshSchemes,
+                    color: AppColors.primary,
+                    child: FutureBuilder<List<SchemeModel>>(
+                      future: _schemesFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return ListView(
+                            children: [
+                              SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                              Center(
+                                child: Text('Error loading schemes: ${snapshot.error}'),
+                              ),
+                            ],
+                          );
+                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return ListView(
+                            children: [
+                              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(32),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.search_off,
+                                          size: 48,
+                                          color: AppColors.textHint),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'No eligible schemes found',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(fontWeight: FontWeight.w600),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Complete your profile and ensure you are connected to the server to see schemes you qualify for.',
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                                color: AppColors.textSecondary),
+                                      ),
+                                      const SizedBox(height: 24),
+                                      OutlinedButton.icon(
+                                        onPressed: _refreshSchemes,
+                                        icon: const Icon(Icons.refresh),
+                                        label: const Text('Refresh'),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: AppColors.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
 
-                      final schemes = snapshot.data!;
-                      return ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        itemCount: schemes.length,
-                        itemBuilder: (context, index) =>
-                            _buildSchemeCard(schemes[index]),
-                      );
-                    },
+                        final schemes = snapshot.data!;
+                        return ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          itemCount: schemes.length,
+                          itemBuilder: (context, index) =>
+                              _buildSchemeCard(schemes[index]),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -353,6 +414,13 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
           // Logo
           const LeafLogo(size: 36),
           const Spacer(),
+          // Refresh button
+          IconButton(
+            onPressed: _refreshSchemes,
+            icon: const Icon(Icons.refresh_rounded),
+            color: AppColors.textPrimary,
+            tooltip: 'Refresh',
+          ),
           // Notification icon
           IconButton(
             onPressed: () => _showComingSoon('features.notifications'.tr()),
