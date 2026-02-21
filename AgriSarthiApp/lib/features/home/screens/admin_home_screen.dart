@@ -462,7 +462,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
           // Verify button
           OutlinedButton(
-            onPressed: () => _showVerifyDialog(applicationId, farmerName),
+            onPressed: () => _navigateToApplicationView(applicationId),
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFF2E7D32),
               side: const BorderSide(color: Color(0xFF2E7D32)),
@@ -670,10 +670,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 bgColor: const Color(0xFFFFF3E0),
                 onTap: () {
                   if (_pendingVerifications.isNotEmpty) {
-                    _showVerifyDialog(
+                    _navigateToApplicationView(
                       _pendingVerifications.first['id'].toString(),
-                      _pendingVerifications.first['farmers']?['name'] ??
-                          'Unknown',
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -792,6 +790,20 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         ],
       ),
     );
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // NAVIGATE TO APPLICATION VIEW
+  // ════════════════════════════════════════════════════════════════════
+
+  /// Navigate to application view screen
+  Future<void> _navigateToApplicationView(String applicationId) async {
+    final result = await context.push<bool>(
+      '${AppRouter.adminApplicationView}/$applicationId',
+    );
+    if (result == true && mounted) {
+      _loadDashboardData();
+    }
   }
 
   // ════════════════════════════════════════════════════════════════════
