@@ -4,7 +4,7 @@ class ApiConfig {
   // POINTING TO PRODUCTION DEPLOYMENT
   // static const String baseUrl = 'https://agrisarthi.onrender.com'; // Production
   // static const String baseUrl = 'http://127.0.0.1:8000/'; // Local Emulator (use your IP for physical device)
-  static const String baseUrl = 'http://192.168.137.139:8000'; // Physical Device
+  static const String baseUrl = 'http://192.168.137.216:8000'; // Physical Device
 
   // API Endpoints
   static const String authLogin = '$baseUrl/api/auth/login/';

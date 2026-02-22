@@ -923,24 +923,42 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
                           ),
                         ),
                         const Spacer(),
-                        GestureDetector(
-                          onTap: () => _applyForScheme(scheme),
-                          child: const Row(
+                        if (scheme.isApplied)
+                          const Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
+                              Icon(Icons.check_circle,
+                                  color: Color(0xFF2E7D32), size: 16),
+                              SizedBox(width: 4),
                               Text(
-                                'Apply',
+                                'Applied',
                                 style: TextStyle(
-                                  color: Color(0xFFFF8F00),
+                                  color: Color(0xFF2E7D32),
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
                                 ),
                               ),
-                              SizedBox(width: 4),
-                              Icon(Icons.arrow_forward,
-                                  color: Color(0xFFFF8F00), size: 16),
                             ],
+                          )
+                        else
+                          GestureDetector(
+                            onTap: () => _applyForScheme(scheme),
+                            child: const Row(
+                              children: [
+                                Text(
+                                  'Apply',
+                                  style: TextStyle(
+                                    color: Color(0xFFFF8F00),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(width: 4),
+                                Icon(Icons.arrow_forward,
+                                    color: Color(0xFFFF8F00), size: 16),
+                              ],
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ],
